@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+              http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_3.xsd"
+              version="2.3">
+
+    <converter>
+        <converter-id>localDateConverter</converter-id>
+        <converter-class>com.suaempresa.processos.converter.LocalDateConverter</converter-class>
+    </converter>
+    
+    <converter>
+        <converter-id>robustLocalDateConverter</converter-id>
+        <converter-class>com.suaempresa.processos.converter.RobustLocalDateConverter</converter-class>
+    </converter>
+
+    <managed-bean>
+        <managed-bean-name>localDateConverter</managed-bean-name>
+        <managed-bean-class>com.suaempresa.processos.converter.LocalDateConverter</managed-bean-class>
+        <managed-bean-scope>application</managed-bean-scope>
+    </managed-bean>
+
+        <converter>
+            <converter-id>usuarioConverter</converter-id>
+            <converter-class>com.suaempresa.processos.converter.UsuarioConverter</converter-class>
+        </converter>
+        <converter>
+            <converter-id>clienteConverter</converter-id>
+            <converter-class>com.suaempresa.processos.converter.ClienteConverter</converter-class>
+        </converter>
+        
+        <converter>
+            <converter-id>licenciamentoConverter</converter-id>
+            <converter-class>com.suaempresa.processos.converter.LicenciamentoConverter</converter-class>
+        </converter>
+    
+    <managed-bean>
+        <managed-bean-name>robustLocalDateConverter</managed-bean-name>
+        <managed-bean-class>com.suaempresa.processos.converter.RobustLocalDateConverter</managed-bean-class>
+        <managed-bean-scope>application</managed-bean-scope>
+    </managed-bean>
+
+</faces-config>

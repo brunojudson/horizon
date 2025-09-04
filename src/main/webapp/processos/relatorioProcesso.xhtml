@@ -1,0 +1,153 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:f="http://xmlns.jcp.org/jsf/core">
+    
+    <div class="relatorio-processo-container">
+        <h2 class="relatorio-processo-title">
+            <i class="pi pi-file-pdf" style="margin-right: 0.8rem; font-size: 1.6rem;"></i>
+            Relatório do Processo
+        </h2>
+        
+        <div class="relatorio-info-grid">
+            <div class="relatorio-info-item">
+                <span class="relatorio-info-label">Título</span>
+                <span class="relatorio-info-value">#{processoBean.processo.titulo}</span>
+            </div>
+            <div class="relatorio-info-item">
+                <span class="relatorio-info-label">ID</span>
+                <span class="relatorio-info-value">#{processoBean.processo.id}</span>
+            </div>
+            <div class="relatorio-info-item">
+                <span class="relatorio-info-label">Tipo de Processo</span>
+                <span class="relatorio-info-value highlight">#{processoBean.processo.tipoProcesso.nome}</span>
+            </div>
+            <div class="relatorio-info-item">
+                <span class="relatorio-info-label">Responsável</span>
+                <span class="relatorio-info-value highlight">#{processoBean.processo.responsavel.nome}</span>
+            </div>
+            <div class="relatorio-info-item">
+                <span class="relatorio-info-label">Status</span>
+                <p:tag value="#{processoBean.processo.status}" styleClass="#{
+                    processoBean.processo.status == 'CONCLUIDO' ? 'status-concluido' :
+                    processoBean.processo.status == 'ABERTO' ? 'status-aberto' :
+                    processoBean.processo.status == 'EM_ANDAMENTO' ? 'status-andamento' :
+                    processoBean.processo.status == 'PARADO' ? 'status-parado' :
+                    processoBean.processo.status == 'CANCELADO' ? 'status-cancelado' :
+                    processoBean.processo.status == 'PENDENTE' ? 'status-pendente' : ''
+                }" />
+            </div>
+            <div class="relatorio-info-item">
+                <span class="relatorio-info-label">Data de Criação</span>
+                <span class="relatorio-info-value">
+                    <h:outputText value="#{processoBean.processo.dataCriacao}">
+                        <f:converter converterId="localDateTimeConverter"/>
+                    </h:outputText>
+                </span>
+            </div>
+            <div class="relatorio-info-item">
+                <span class="relatorio-info-label">Data Prev. Finalização</span>
+                <span class="relatorio-info-value">
+                    <h:outputText value="#{processoBean.processo.dataPrevisaoFinalizacao}">
+                        <f:converter converterId="localDateConverter"/>
+                    </h:outputText>
+                </span>
+            </div>
+            <div class="relatorio-info-item">
+                <span class="relatorio-info-label">Valor Total</span>
+                <span class="relatorio-info-value success">
+                    <h:outputText value="#{processoBean.processo.taxaValorTotal}">
+                        <f:convertNumber type="currency" currencySymbol="R$"/>
+                    </h:outputText>
+                </span>
+            </div>
+            <div class="relatorio-info-item full-width">
+                <span class="relatorio-info-label">Descrição</span>
+                <span class="relatorio-info-value">#{processoBean.processo.descricao}</span>
+            </div>
+            <div class="relatorio-info-item full-width">
+                <span class="relatorio-info-label">Tempo/Duração</span>
+                <span class="relatorio-info-value highlight">#{processoBean.duracaoProcessoFormatada}</span>
+            </div>
+        </div>
+        
+        <hr class="relatorio-section-divider"/>
+        
+        <h3 class="relatorio-etapas-title">
+            <i class="pi pi-list"></i>
+            Etapas do Processo
+        </h3>
+        
+        <p:outputPanel rendered="#{processoBean.etapasDoProcesso != null and not empty processoBean.etapasDoProcesso}">
+            <ui:repeat value="#{processoBean.etapasDoProcesso}" var="etapa">
+                <div class="etapa-card-relatorio">
+                    <div class="etapa-header-relatorio">
+                        <h4 class="etapa-title-relatorio">#{etapa.etapaDisponivel.titulo}</h4>
+                        <div class="etapa-meta-info">
+                            <p:tag value="#{etapa.status}" styleClass="#{
+                                etapa.status == 'CONCLUIDO' ? 'status-concluido' :
+                                etapa.status == 'ABERTO' ? 'status-aberto' :
+                                etapa.status == 'EM_ANDAMENTO' ? 'status-andamento' :
+                                etapa.status == 'PARADO' ? 'status-parado' :
+                                etapa.status == 'CANCELADO' ? 'status-cancelado' :
+                                etapa.status == 'PENDENTE' ? 'status-pendente' : ''
+                            }" />
+                            <span class="etapa-date-info">
+                                <i class="pi pi-calendar"></i>
+                                <h:outputText value="#{etapa.dataPrevisaoFinalizacao}">
+                                    <f:converter converterId="localDateConverter"/>
+                                </h:outputText>
+                            </span>
+                            <ui:fragment rendered="#{etapa.dataFinalizacao != null}">
+                                <span class="etapa-date-info completed">
+                                    <i class="pi pi-check-circle"></i>
+                                    <strong>Concluída:</strong>
+                                    <h:outputText value="#{etapa.dataFinalizacao}">
+                                        <f:converter converterId="localDateTimeConverter"/>
+                                    </h:outputText>
+                                </span>
+                            </ui:fragment>
+                        </div>
+                    </div>
+                    
+                    <div class="etapa-itens-container">
+                        <p:outputPanel rendered="#{etapa.itens != null and not empty etapa.itens}">
+                            <span class="relatorio-info-label">Itens:</span>
+                            <div style="margin-top: 0.8rem;">
+                                <ui:repeat value="#{etapa.itens}" var="item">
+                                    <span class="etapa-item-tag">
+                                        #{item.itemDisponivel.titulo}
+                                        <span class="etapa-item-status #{item.concluido ? 'concluido' : 'pendente'}">
+                                            <i class="pi #{item.concluido ? 'pi-check-circle' : 'pi-clock'}"></i>
+                                            #{item.concluido ? 'Concluído' : 'Pendente'}
+                                        </span>
+                                        <ui:fragment rendered="#{item.dataFinalizacao != null}">
+                                            <span class="etapa-date-info" style="font-size: 0.85rem; margin-left: 0.5rem;">
+                                                <i class="pi pi-calendar"></i>
+                                                <h:outputText value="#{item.dataFinalizacao}">
+                                                    <f:converter converterId="localDateTimeConverter"/>
+                                                </h:outputText>
+                                            </span>
+                                        </ui:fragment>
+                                    </span>
+                                </ui:repeat>
+                            </div>
+                        </p:outputPanel>
+                        <p:outputPanel rendered="#{etapa.itens == null or empty etapa.itens}">
+                            <span style="color: #78909c; font-style: italic;">Nenhum item cadastrado nesta etapa.</span>
+                        </p:outputPanel>
+                    </div>
+                </div>
+            </ui:repeat>
+        </p:outputPanel>
+        
+        <p:outputPanel rendered="#{processoBean.etapasDoProcesso == null or empty processoBean.etapasDoProcesso}">
+            <div class="empty-state-modern">
+                <i class="pi pi-info-circle empty-icon"></i>
+                <div class="empty-title">Nenhuma etapa cadastrada</div>
+                <div class="empty-description">Este processo ainda não possui etapas definidas.</div>
+            </div>
+        </p:outputPanel>
+    </div>
+</ui:composition>

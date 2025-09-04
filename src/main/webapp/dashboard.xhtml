@@ -1,0 +1,424 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:p="http://primefaces.org/ui" xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:f="http://xmlns.jcp.org/jsf/core" template="/WEB-INF/template.xhtml">
+
+    <ui:define name="content">
+        <h:form id="dashboardForm">
+            <div class="dashboard-container-profissional">
+                <!-- Header do Dashboard -->
+                <div class="dashboard-header">
+                    <div class="header-info">
+                        <h1>
+                            <i class="pi pi-chart-line"></i>
+                            Dashboard Executivo
+                        </h1>
+                        <p class="subtitle">Centro de Comando para Gestão Estratégica de Processos</p>
+                    </div>
+                    <div class="header-actions">
+                        <!-- Sino de Alertas -->
+                        <div class="alerta-sino-container">
+                            <p:commandButton 
+                                icon="pi pi-bell" 
+                                styleClass="ui-button-rounded ui-button-warning sino-alerta"
+                                onclick="document.getElementById('alertas-licenciamento').scrollIntoView({behavior: 'smooth', block: 'center'}); return false;"
+                                title="#{dashboardBean.licenciamentosProximos.size()} alertas de licenciamento">
+                                <span class="sino-badge">#{dashboardBean.licenciamentosProximos.size()}</span>
+                            </p:commandButton>
+                        </div>
+                        
+                        <p:commandButton value="Atualizar" icon="pi pi-refresh"
+                            actionListener="#{dashboardBean.atualizarDados()}" update="dashboardForm"
+                            styleClass="ui-button-secondary ui-corporativo-btn btn-refresh" />
+                    </div>
+                </div>
+
+                <!-- Métricas Principais -->
+                <div class="dashboard-metrics">
+                    <div class="metric-card metric-primary">
+                        <div class="metric-icon">
+                            <i class="pi pi-sitemap"></i>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value">#{dashboardBean.processos.size()}</div>
+                            <div class="metric-label">Processos Ativos</div>
+                            <div class="metric-trend">
+                                <!-- <i class="pi pi-arrow-up"></i>
+                            <span>+12% este mês</span> -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card metric-success">
+                        <div class="metric-icon">
+                            <i class="pi pi-check-circle"></i>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value">#{dashboardBean.quantidadeProcessosConcluidos}</div>
+                            <div class="metric-label">Concluídos</div>
+                            <div class="metric-trend positive">
+                                <!-- <i class="pi pi-arrow-up"></i>
+                            <span>+8% este mês</span> -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card metric-warning">
+                        <div class="metric-icon">
+                            <i class="pi pi-clock"></i>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value">#{dashboardBean.processosAtrasados}</div>
+                            <div class="metric-label">Atrasados</div>
+                            <div class="metric-trend negative">
+                                <!-- <i class="pi pi-arrow-down"></i>
+                            <span>Monitorando</span> -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card metric-danger">
+                        <div class="metric-icon">
+                            <i class="pi pi-ban"></i>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value">#{dashboardBean.processosParados}</div>
+                            <div class="metric-label">Parados</div>
+                            <div class="metric-trend">
+                                <!-- <i class="pi pi-minus"></i>
+                            <span>Estável</span> -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card metric-info">
+                        <div class="metric-icon">
+                            <i class="pi pi-percentage"></i>
+                        </div>
+                        <div class="metric-content">
+                            <div class="metric-value" style="font-size: 2.5rem !important">
+                                #{dashboardBean.taxaConclusao}%</div>
+                            <div class="metric-label">Taxa de Conclusão</div>
+                            <div class="metric-trend positive">
+                                <!-- <i class="pi pi-arrow-up"></i>
+                            <span>Meta: 85%</span> -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grid de Conteúdo Principal -->
+                <div class="dashboard-content-grid">
+                    <!-- Alertas de Licenciamento -->
+                    <div class="widget-card alertas-widget" id="alertas-licenciamento">
+                        <div class="widget-header">
+                            <div class="widget-title">
+                                <i class="pi pi-bell"></i>
+                                <h3>Alertas de Licenciamento</h3>
+                            </div>
+                            <div class="widget-badge">
+                                <span class="badge-alert">#{dashboardBean.licenciamentosProximos.size()}</span>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <p:dataTable value="#{dashboardBean.licenciamentosProximos}" var="lic"
+                                responsiveLayout="scroll" emptyMessage="✅ Nenhum licenciamento próximo do vencimento"
+                                styleClass="dashboard-table-modern">
+
+                                <p:column headerText="Tipo" style="width: 25%;">
+                                    <div class="tipo-licenciamento">
+                                        <i class="pi pi-id-card"></i>
+                                        <span>#{lic.tipoLicenciamentoNome}</span>
+                                    </div>
+                                </p:column>
+
+                                <p:column headerText="Cliente" style="width: 30%;">
+                                    <div class="cliente-info">
+                                        <i class="pi pi-user"></i>
+                                        <span>#{lic.clienteRazaoSocial}</span>
+                                    </div>
+                                </p:column>
+
+                                <p:column headerText="Vencimento" style="width: 20%; text-align: center;">
+                                    <div class="data-vencimento">
+                                        <h:outputText value="#{lic.dataVencimento}"
+                                            rendered="#{lic.dataVencimento != null}">
+                                            <f:converter converterId="localDateConverter" />
+                                        </h:outputText>
+                                        <h:outputText value="N/A" rendered="#{lic.dataVencimento == null}"
+                                            styleClass="text-muted" />
+                                    </div>
+                                </p:column>
+
+                                <p:column headerText="Status" style="width: 15%; text-align: center;">
+                                    <p:tag severity="danger" value="VENCIDO" icon="pi pi-times"
+                                        rendered="#{lic.alertaVencimento == 'VENCIDO'}" styleClass="tag-vencido" />
+                                    <p:tag severity="warning" value="PRÓXIMO" icon="pi pi-exclamation-triangle"
+                                        rendered="#{lic.alertaVencimento == 'PRÓXIMO'}" styleClass="tag-proximo" />
+                                </p:column>
+
+                                <p:column headerText="Ações" style="width: 10%; text-align: center;">
+                                    <p:commandButton icon="pi pi-eye" title="Ver Licenciamento"
+                                        styleClass="ui-button-rounded ui-button-info ui-button-sm action-btn"
+                                        action="/licenciamentos/lista?faces-redirect=true" />
+                                </p:column>
+                            </p:dataTable>
+                        </div>
+                    </div>
+
+                    <!-- Tabela de Processos Melhorada -->
+                    <div class="widget-card processos-widget">
+                        <div class="widget-header">
+                            <div class="widget-title">
+                                <i class="pi pi-sitemap"></i>
+                                <h3>Processos - Visão Executiva</h3>
+                            </div>
+                            <div class="widget-actions">
+                                <p:commandButton value="Ver Todos" icon="pi pi-list"
+                                    action="/processos/lista?faces-redirect=true"
+                                    styleClass="ui-button-secondary ui-button-outlined ui-button-sm" />
+                                <p:commandButton value="Novo Processo" icon="pi pi-plus"
+                                    action="/processos/lista?faces-redirect=true"
+                                    styleClass="ui-button-success ui-corporativo-btn" />
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <p:dataTable value="#{dashboardBean.processos}" var="proc" responsiveLayout="scroll"
+                                emptyMessage="Nenhum processo encontrado" styleClass="dashboard-table-executive"
+                                paginator="true" rows="8" paginatorPosition="bottom">
+
+                                <p:column headerText="ID" style="width: 80px; text-align: center;">
+                                    <div class="processo-id">
+                                        <span class="id-badge">#{proc.id}</span>
+                                    </div>
+                                </p:column>
+
+                                <p:column headerText="Cliente" sortBy="#{proc.clienteRazaoSocial}" style="width: 20%;">
+                                    <div class="cliente-processo">
+                                        <i class="pi pi-briefcase"></i>
+                                        <span class="cliente-nome">#{proc.clienteRazaoSocial}</span>
+                                    </div>
+                                </p:column>
+
+                                <p:column headerText="Processo &amp; Progresso" sortBy="#{proc.titulo}"
+                                    style="width: 35%;">
+                                    <div class="processo-detalhes">
+                                        <h4 class="processo-titulo">#{proc.titulo}</h4>
+                                        <div class="progress-container">
+                                            <p:progressBar value="#{proc.porcentagemConclusao}"
+                                                labelTemplate="#{proc.porcentagemConclusao}% concluído"
+                                                styleClass="progress-executive"
+                                                style="height: 24px; border-radius: 12px; margin-top: 0.5rem;" />
+                                        </div>
+                                    </div>
+                                </p:column>
+
+                                <p:column headerText="Status" style="width: 15%; text-align: center;">
+                                    <div class="status-container">
+                                        <p:tag value="#{proc.status}" icon="#{
+                                                   proc.status == 'CONCLUIDO' ? 'pi pi-check-circle' :
+                                                   proc.status == 'ABERTO' ? 'pi pi-folder-open' :
+                                                   proc.status == 'EM_ANDAMENTO' ? 'pi pi-cog' :
+                                                   proc.status == 'PARADO' ? 'pi pi-pause-circle' :
+                                                   proc.status == 'CANCELADO' ? 'pi pi-times-circle' :
+                                                   proc.status == 'PENDENTE' ? 'pi pi-clock' :
+                                                   'pi pi-info-circle'
+                                               }" styleClass="#{
+                                                   proc.status == 'CONCLUIDO' ? 'status-concluido' :
+                                                   proc.status == 'ABERTO' ? 'status-aberto' :
+                                                   proc.status == 'EM_ANDAMENTO' ? 'status-andamento' :
+                                                   proc.status == 'PARADO' ? 'status-parado' :
+                                                   proc.status == 'CANCELADO' ? 'status-cancelado' :
+                                                   proc.status == 'PENDENTE' ? 'status-pendente' :
+                                                   ''
+                                               } status-executive" />
+                                    </div>
+                                </p:column>
+
+                                <p:column headerText="Prazo" style="width: 15%; text-align: center;">
+                                    <div class="prazo-info">
+                                        <div class="data-prazo">
+                                            <h:outputText value="#{proc.dataPrevisao}"
+                                                rendered="#{proc.dataPrevisao != null}">
+                                                <f:converter converterId="localDateConverter" />
+                                            </h:outputText>
+                                            <span class="sem-prazo" rendered="#{proc.dataPrevisao == null}">N/A</span>
+                                        </div>
+                                        <p:tag severity="#{proc.alertaPrazo == 'VENCIDO' ? 'danger' : 'warning'}"
+                                            value="#{proc.alertaPrazo}" rendered="#{not empty proc.alertaPrazo}"
+                                            styleClass="alert-prazo" />
+                                    </div>
+                                </p:column>
+
+                                <p:column headerText="Ações" style="width: 10%; text-align: center;">
+                                    <div class="acoes-processo">
+                                        <p:commandButton icon="pi pi-eye" title="Ver Detalhes"
+                                            action="#{dashboardBean.visualizarProcesso(proc)}"
+                                            styleClass="ui-button-rounded ui-button-info ui-button-sm action-btn">
+                                            <f:param name="processoId" value="#{proc.id}" />
+                                        </p:commandButton>
+                                    </div>
+                                </p:column>
+                            </p:dataTable>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumo Executivo Final -->
+                <div class="dashboard-summary-section">
+                    <div class="summary-card">
+                        <div class="summary-header">
+                            <i class="pi pi-chart-line"></i>
+                            <h3>Resumo Executivo</h3>
+                        </div>
+                        <div class="summary-grid">
+                            <div class="summary-item">
+                                <div class="summary-metric">
+                                    <span class="summary-number">#{dashboardBean.totalProcessosAtivos}</span>
+                                    <span class="summary-label">Processos Ativos</span>
+                                </div>
+                                <i class="pi pi-cog summary-icon"></i>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-metric">
+                                    <span class="summary-number">#{dashboardBean.processosConcluidos}</span>
+                                    <span class="summary-label">Concluídos Este Mês</span>
+                                </div>
+                                <i class="pi pi-check-circle summary-icon"></i>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-metric">
+                                    <span class="summary-number">#{dashboardBean.licenciamentosProximos.size()}</span>
+                                    <span class="summary-label">Alertas Pendentes</span>
+                                </div>
+                                <i class="pi pi-bell summary-icon"></i>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-metric">
+                                    <span class="summary-number">#{dashboardBean.totalClientes}</span>
+                                    <span class="summary-label">Clientes Ativos</span>
+                                </div>
+                                <i class="pi pi-users summary-icon"></i>
+                            </div>
+                        </div>
+                        <div class="summary-footer">
+                            <p class="summary-note">
+                                <i class="pi pi-info-circle"></i>
+                                Dados atualizados em tempo real para tomada de decisão executiva
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- dashboard-container -->
+        </h:form>
+        
+        <style>
+            /* ===== SINO DE ALERTA PROFISSIONAL ===== */
+            .alerta-sino-container {
+                position: relative;
+                margin-right: 1.5em;
+            }
+            
+            .sino-alerta {
+                position: relative !important;
+                background: linear-gradient(135deg, #ff9800, #f57c00) !important;
+                border: none !important;
+                box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3) !important;
+                width: 48px !important;
+                height: 48px !important;
+                border-radius: 50% !important;
+                transition: all 0.3s ease !important;
+                animation: pulseAlert 2s infinite !important;
+            }
+            
+            .sino-alerta:hover {
+                transform: translateY(-2px) scale(1.05) !important;
+                box-shadow: 0 8px 20px rgba(255, 152, 0, 0.4) !important;
+                animation: none !important;
+            }
+            
+            .sino-alerta .pi {
+                font-size: 1.1em !important;
+                color: white !important;
+            }
+            
+            .sino-badge {
+                position: absolute !important;
+                top: -8px !important;
+                right: -8px !important;
+                background: linear-gradient(135deg, #d32f2f, #c62828) !important;
+                color: white !important;
+                border-radius: 50% !important;
+                min-width: 24px !important;
+                height: 24px !important;
+                font-size: 12px !important;
+                font-weight: 700 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                border: 2px solid white !important;
+                box-shadow: 0 2px 8px rgba(211, 47, 47, 0.4) !important;
+                animation: bounceAlert 1.5s infinite !important;
+            }
+            
+            /* Animações para o sino */
+            @keyframes pulseAlert {
+                0%, 100% { 
+                    transform: scale(1); 
+                    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+                }
+                50% { 
+                    transform: scale(1.05); 
+                    box-shadow: 0 6px 16px rgba(255, 152, 0, 0.5);
+                }
+            }
+            
+            @keyframes bounceAlert {
+                0%, 100% { 
+                    transform: translateY(0); 
+                }
+                25%, 75% { 
+                    transform: translateY(-3px); 
+                }
+                50% { 
+                    transform: translateY(-6px); 
+                }
+            }
+            
+            /* Efeito quando há alertas */
+            .sino-alerta[title*="0 alertas"] {
+                background: linear-gradient(135deg, #4caf50, #388e3c) !important;
+                animation: none !important;
+            }
+            
+            .sino-alerta[title*="0 alertas"] .sino-badge {
+                display: none !important;
+            }
+            
+            /* Scroll suave global */
+            html {
+                scroll-behavior: smooth;
+            }
+            
+            /* Destaque da seção quando scroll */
+            #alertas-licenciamento {
+                transition: all 0.3s ease;
+            }
+            
+            #alertas-licenciamento:target,
+            #alertas-licenciamento.highlight {
+                background: linear-gradient(135deg, #fff3e0, #ffeaa7) !important;
+                border: 2px solid #ff9800 !important;
+                border-radius: 12px !important;
+                box-shadow: 0 8px 24px rgba(255, 152, 0, 0.2) !important;
+                transform: scale(1.02) !important;
+            }
+            
+            /* Ajustes no header para acomodar o sino */
+            .header-actions {
+                display: flex !important;
+                align-items: center !important;
+                gap: 1em !important;
+            }
+        </style>
+    </ui:define>
+</ui:composition>

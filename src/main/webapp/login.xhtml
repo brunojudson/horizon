@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      lang="pt-br"
+      xml:lang="pt-br">
+<h:head>
+    <title>Login - Sistema de Processos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <!-- PrimeFlex CSS removido - não disponível no projeto -->
+    <h:outputStylesheet name="css/layout.css"  />
+    <style type="text/css">
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(120deg, #1976d2 0%, #42a5f5 100%);
+        }
+        .login-panel {
+            width: 370px;
+            padding: 2.5rem 2rem 2rem 2rem;
+            box-shadow: 0 6px 32px 0 rgba(25,118,210,0.13);
+            border-radius: 14px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .login-logo {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 1.2rem;
+            border-radius: 50%;
+            background: #1976d2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px 0 rgba(25,118,210,0.10);
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .login-logo i {
+            color: #fff;
+            font-size: 2rem;
+            margin: 0 auto;
+            display: block;
+        }
+        .login-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1976d2;
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+            text-align: center;
+            width: 100%;
+        }
+        .login-subtitle {
+            color: #888;
+            font-size: 1.05rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            width: 100%;
+        }
+        .field {
+            margin-bottom: 1.2rem;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .field .ui-inputfield, .field .ui-password {
+            width: 100% !important;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+        .login-panel label {
+            font-weight: 600;
+            color: #1976d2;
+            margin-bottom: 0.2rem;
+            display: block;
+            text-align: left;
+        }
+        .ui-inputfield, .ui-password {
+            font-size: 1.08rem;
+            border-radius: 6px;
+            border: 1px solid #b6c2d2;
+            padding: 0.7rem 1rem;
+        }
+        .ui-inputfield:focus, .ui-password:focus {
+            border-color: #1976d2;
+            box-shadow: 0 0 0 2px #1976d222;
+        }
+        .ui-message-error {
+            color: #d32f2f;
+            font-size: 0.98rem;
+        }
+        .login-btn {
+            width: 100%;
+            font-size: 1.12rem;
+            padding: 0.8rem 0;
+            border-radius: 6px;
+            font-weight: 700;
+            margin-top: 0.5rem;
+        }
+        @media (max-width: 500px) {
+            .login-panel {
+                width: 98vw;
+                padding: 1.2rem 0.5rem;
+            }
+        }
+    </style>
+</h:head>
+<h:body>
+    <p:card styleClass="login-panel">
+        <div class="login-logo">
+            <i class="pi pi-lock"></i>
+        </div>
+        <div class="login-title">Acesso ao Sistema</div>
+        <div class="login-subtitle">Entre com suas credenciais para continuar</div>
+        <h:form id="loginForm">
+            <p:focus for="email" />
+            <p:messages id="messages" showDetail="true" closable="true"/>
+            <div class="field">
+                <p:outputLabel for="email">Email</p:outputLabel>
+                <p:inputText id="email" value="#{loginBean.email}" required="true" styleClass="w-full" placeholder="Digite seu e-mail" autofocus="true"/>
+            </div>
+            <div class="field">
+                <p:outputLabel for="senha">Senha</p:outputLabel>
+                <p:password id="senha" value="#{loginBean.senha}" required="true" feedback="false" styleClass="w-full" placeholder="Digite sua senha"/>
+            </div>
+            <p:commandButton value="Entrar" action="#{loginBean.doLogin()}" update="loginForm" styleClass="login-btn ui-button-primary" icon="pi pi-sign-in"/>
+        </h:form>
+    </p:card>
+</h:body>
+</html>
+
+

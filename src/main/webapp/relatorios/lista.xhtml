@@ -1,0 +1,313 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui" template="/WEB-INF/template.xhtml">
+
+	<ui:define name="title">Relatórios Gerenciais</ui:define>
+
+	<ui:define name="content">
+		<h:form id="relatorioForm">
+			<p:growl id="messages" showDetail="true" closable="true" />
+			<div class="filtros-relatorio-container">
+				<div class="filtros-relatorio-title">
+					<i class="pi pi-filter"></i>
+					Filtros de Relatório
+				</div>
+				<div class="filtros-grid-modern">
+					<div class="filtro-field-modern">
+						<label class="filtro-label-modern" for="dataInicio">Data Início</label>
+						<p:calendar id="dataInicio" value="#{relatorioBean.dataInicio}" pattern="dd/MM/yyyy" mask="true"
+							showOn="button" navigator="true" monthNavigator="true" yearNavigator="true" locale="pt_BR"
+							showButtonPanel="true" styleClass="ui-inputfield-corporativo calendar-corporativo" />
+					</div>
+					<div class="filtro-field-modern">
+						<label class="filtro-label-modern" for="dataFim">Data Fim</label>
+						<p:calendar id="dataFim" value="#{relatorioBean.dataFim}" pattern="dd/MM/yyyy" mask="true"
+							showOn="button" navigator="true" monthNavigator="true" yearNavigator="true" locale="pt_BR"
+							showButtonPanel="true" styleClass="ui-inputfield-corporativo calendar-corporativo" />
+					</div>
+					<div class="filtro-field-modern">
+						<label class="filtro-label-modern" for="status">Status</label>
+						<p:selectCheckboxMenu id="status" value="#{relatorioBean.statusSelecionados}" label="Selecione"
+							filter="true" filterMatchMode="contains" styleClass="filtro-input-modern">
+							<f:selectItems value="#{relatorioBean.todosStatus}" var="s" itemLabel="#{s.label}"
+								itemValue="#{s}" />
+						</p:selectCheckboxMenu>
+					</div>
+					<div class="filtro-field-modern">
+						<label class="filtro-label-modern" for="clientes">Clientes</label>
+						<p:selectCheckboxMenu id="clientes" value="#{relatorioBean.clientesSelecionados}"
+							label="Selecione" filter="true" filterMatchMode="contains" styleClass="filtro-input-modern"
+							converter="clienteConverter">
+							<f:selectItems value="#{relatorioBean.todosClientes}" var="cli"
+								itemLabel="#{cli.razaoSocial}" itemValue="#{cli}" />
+						</p:selectCheckboxMenu>
+					</div>
+					<div class="filtro-field-modern">
+						<label class="filtro-label-modern" for="responsaveis">Responsáveis</label>
+						<p:selectCheckboxMenu id="responsaveis" value="#{relatorioBean.responsaveisSelecionados}"
+							label="Selecione" filter="true" filterMatchMode="contains" styleClass="filtro-input-modern"
+							converter="usuarioConverter">
+							<f:selectItems value="#{relatorioBean.todosResponsaveis}" var="resp"
+								itemLabel="#{resp.nome}" itemValue="#{resp}" />
+						</p:selectCheckboxMenu>
+					</div>
+					<div class="filtro-field-modern botao-gerar-container">
+						<p:commandButton value="Gerar Relatório" action="#{relatorioBean.gerarRelatorio}"
+							update=":relatorioForm:relatorioPanel messages" icon="pi pi-chart-bar"
+							styleClass="ui-button-success ui-corporativo-btn" />
+					</div>
+				</div>
+			</div>
+
+			<p:outputPanel id="relatorioPanel">
+				<p:card styleClass="relatorio-resultados-container" rendered="#{not empty relatorioBean.processos}">
+					<f:facet name="title">
+						<div class="relatorio-resultados-title">
+							<i class="pi pi-chart-bar"></i>
+							Resultados do Relatório
+						</div>
+					</f:facet>
+
+					<div class="dashboard-cards">
+						<div class="dashboard-card card-success">
+							<div class="card-icon">
+								<i class="pi pi-check-circle"></i>
+							</div>
+							<div class="card-content">
+								<h3>#{relatorioBean.processosFinalizados}</h3>
+								<p>Finalizados</p>
+							</div>
+						</div>
+						<div class="dashboard-card card-warning">
+							<div class="card-icon">
+								<i class="pi pi-clock"></i>
+							</div>
+							<div class="card-content">
+								<h3>
+									<h:outputText value="#{relatorioBean.tempoMedioConclusao}">
+										<f:convertNumber minFractionDigits="2" maxFractionDigits="2" />
+									</h:outputText>
+								</h3>
+								<p>Tempo Médio (dias)</p>
+							</div>
+						</div>
+						<div class="dashboard-card card-info">
+							<div class="card-icon">
+								<i class="pi pi-money-bill"></i>
+							</div>
+							<div class="card-content">
+								<h3>
+									<h:outputText value="#{relatorioBean.totalTaxasGerenciadas}">
+										<f:convertNumber type="currency" currencySymbol="R$" locale="pt_BR" />
+									</h:outputText>
+								</h3>
+								<p>Total Taxas</p>
+							</div>
+						</div>
+						<div class="dashboard-card card-danger">
+							<div class="card-icon">
+								<i class="pi pi-exclamation-triangle"></i>
+							</div>
+							<div class="card-content">
+								<h3>#{relatorioBean.processosAtrasados}</h3>
+								<p>Atrasados</p>
+							</div>
+						</div>
+					</div>
+
+					<p:tabView style="margin-top:20px;">
+						<p:tab title="Distribuição por Tipo">
+							<p:card>
+								<f:facet name="title">Distribuição por Tipo</f:facet>
+								<p:pieChart model="#{relatorioBean.pieModel}"
+									style="width:100%;height:560px;max-height:560px;"
+									rendered="#{not empty relatorioBean.pieModel}" />
+							</p:card>
+						</p:tab>
+						<p:tab title="Carga por Responsável">
+							<p:card>
+								<f:facet name="title">Carga por Responsável</f:facet>
+								<p:barChart model="#{relatorioBean.barModel}" style="width:100%;height:500px"
+									rendered="#{not empty relatorioBean.barModel}" />
+							</p:card>
+						</p:tab>
+						<p:tab title="Tempo Médio por Etapa">
+							<p:card>
+								<f:facet name="title">Tempo Médio por Etapa</f:facet>
+								<p:lineChart model="#{relatorioBean.lineModel}" style="width:100%;height:350px"
+									rendered="#{not empty relatorioBean.lineModel}" />
+							</p:card>
+						</p:tab>
+
+						<p:tab title="Detalhes">
+							<p:card>
+								<f:facet name="title">Lista de Processos</f:facet>
+								<p:dataTable id="relatorioTable" value="#{relatorioBean.processos}" var="proc" rows="10"
+									paginator="true"
+									paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+									rowsPerPageTemplate="5,10,15" exportSelectionOnly="true"
+									styleClass="tabela-relatorio-moderna" scrollable="true" scrollHeight="350"
+									resizableColumns="true" columnResizeMode="expand" rowHover="true"
+									responsiveLayout="scroll"
+									emptyMessage="Nenhum processo encontrado para os filtros selecionados."
+									rowStyleClass="#{proc.status.label eq 'Concluído' ? 'row-concluido' : proc.status.label eq 'Atrasado' ? 'row-atrasado' : ''}">
+
+									<f:facet name="header">
+										<div class="tabela-header-corporativo">
+											<span class="tabela-titulo-corporativo">Lista de Processos</span>
+											<p:commandButton id="excel" value="Exportar Excel" icon="pi pi-file-excel"
+												ajax="false" styleClass="ui-button-success ui-corporativo-btn">
+												<p:dataExporter type="xlsx" target="relatorioTable"
+													fileName="relatorio_processos" />
+											</p:commandButton>
+										</div>
+									</f:facet>
+
+									<p:column headerText="ID" style="width:70px;text-align:center;">
+										<h:outputText value="#{proc.id}" />
+									</p:column>
+									
+									<p:column headerText="Título do Processo" style="min-width:200px;">
+										<h:outputText value="#{proc.titulo}" title="#{proc.titulo}" />
+									</p:column>
+									
+									<p:column headerText="Cliente" style="min-width:160px;">
+										<h:outputText value="#{proc.clienteRazaoSocial}"
+											title="#{proc.clienteRazaoSocial}" />
+									</p:column>
+									
+									<p:column headerText="Status" sortBy="#{proc.status.label}" style="width:120px;text-align:center;">
+										<div class="status-container-corporativo">
+											<i class="pi #{
+												proc.status.label eq 'Concluído' ? 'pi-check-circle' :
+												proc.status.label eq 'Atrasado' ? 'pi-exclamation-triangle' :
+												proc.status.label eq 'Em Andamento' ? 'pi-cog' :
+												proc.status.label eq 'Pausado' ? 'pi-pause-circle' :
+												proc.status.label eq 'Cancelado' ? 'pi-times-circle' :
+												proc.status.label eq 'Pendente' ? 'pi-clock' :
+												proc.status.label eq 'Aberto' ? 'pi-folder-open' :
+												'pi-circle'
+											} #{
+												proc.status.label eq 'Concluído' ? 'status-concluido' :
+												proc.status.label eq 'Atrasado' ? 'status-atrasado' :
+												proc.status.label eq 'Em Andamento' ? 'status-andamento' :
+												proc.status.label eq 'Pausado' ? 'status-parado' :
+												proc.status.label eq 'Cancelado' ? 'status-cancelado' :
+												proc.status.label eq 'Pendente' ? 'status-pendente' :
+												proc.status.label eq 'Aberto' ? 'status-aberto' :
+												'status-andamento'
+											} status-icon"></i>
+											<h:outputText value="#{proc.status.label}"
+												styleClass="status-texto-corporativo" />
+										</div>
+									</p:column>
+									
+									<p:column headerText="Data Criação" style="width:120px;text-align:center;">
+										<h:outputText value="#{proc.dataCriacaoAsDate}">
+											<f:convertDateTime pattern="dd/MM/yyyy" />
+										</h:outputText>
+									</p:column>
+									
+									<p:column headerText="Tempo Total (dias)" style="width:100px;text-align:center;">
+										<h:outputText value="#{proc.tempoTotalEmDias}" />
+									</p:column>
+									
+									<p:column headerText="Taxa Total" style="width:120px;text-align:right;">
+										<h:outputText value="#{proc.taxaValorTotal}">
+											<f:convertNumber type="currency" currencySymbol="R$" locale="pt_BR" />
+										</h:outputText>
+									</p:column>
+								</p:dataTable>
+								<style>
+									.ui-inputfield-corporativo {
+										border: none !important;
+									}
+
+									.modern-table .ui-datatable-tablewrapper {
+										border-radius: 8px;
+										border: 1px solid #e0e0e0;
+										overflow: hidden;
+									}
+
+									.modern-table .ui-datatable-header {
+										background: linear-gradient(90deg, #f5f5f5 80%, #e3f2fd 100%);
+										font-weight: 700;
+										font-size: 1.08em;
+										color: #1976d2;
+										border-bottom: 1px solid #e0e0e0;
+									}
+
+									.modern-table .ui-datatable-data>tr:nth-child(even) {
+										background: #f7fafd;
+									}
+
+									.modern-table .ui-datatable-data>tr:hover {
+										background: #e3f2fd;
+										transition: background 0.2s;
+									}
+
+									.modern-table .ui-datatable-row {
+										font-size: 0.97em;
+										height: 36px;
+									}
+
+									.modern-table .ui-datatable-scrollable-header-box {
+										border-bottom: 1px solid #e0e0e0;
+									}
+
+									.modern-table .ui-datatable-scrollable-body {
+										background: #fff;
+									}
+
+									.modern-table .ui-datatable-scrollable-footer-box {
+										border-top: 1px solid #e0e0e0;
+									}
+
+									.modern-table .ui-datatable .ui-column-resizer {
+										background: #bdbdbd;
+									}
+
+									.modern-table .ui-datatable .ui-sortable-column-icon {
+										color: #1976d2;
+									}
+
+									.modern-table .ui-datatable .ui-paginator {
+										background: #fafbfc;
+										border-radius: 0 0 8px 8px;
+									}
+
+									.row-concluido {
+										background: #e8f5e9 !important;
+									}
+
+									.row-atrasado {
+										background: #ffebee !important;
+									}
+
+									body .ui-tag {
+										color: #fff !important;
+									}
+
+									@media (max-width: 900px) {
+
+										.modern-table .ui-datatable-scrollable-body table,
+										.modern-table .ui-datatable-scrollable-header-box table {
+											font-size: 0.93em;
+										}
+									}
+								</style>
+							</p:card>
+						</p:tab>
+					</p:tabView>
+				</p:card>
+				<p:outputPanel rendered="#{empty relatorioBean.processos}">
+					<p:card style="background:#fff3cd;border:1px solid #ffeeba;">
+						<f:facet name="title"><span class="pi pi-info-circle" style="color:#856404" /> Aviso</f:facet>
+						<p:staticMessage severity="warn" summary="Nenhum dado encontrado para os filtros selecionados."
+							style="margin-top:20px;" />
+					</p:card>
+				</p:outputPanel>
+			</p:outputPanel>
+		</h:form>
+	</ui:define>
+</ui:composition>

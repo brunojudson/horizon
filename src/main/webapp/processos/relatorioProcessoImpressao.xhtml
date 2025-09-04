@@ -1,0 +1,258 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <div style="background: #f7f9fa; border-radius: 10px; box-shadow: 0 2px 12px #00000014; padding: 0.2rem 2.5rem 2rem 2.5rem; max-width: 700px; margin: 2rem auto;">
+        <h2 style="color: #1976d2; font-weight: 700; font-size: 1.6rem; margin-bottom: 1.5rem; letter-spacing: -1px; text-align: center;">
+            Relatório do Processo
+        </h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem 2.2rem; margin-bottom: 1.5rem;">
+            <div>
+                <span style="font-weight: 600; color: #555;">Título:</span><br/>
+                <span style="color: #222;">#{processoBean.processo.titulo}</span>
+            </div>
+            <div>
+                <span style="font-weight: 600; color: #555;">ID:</span><br/>
+                <span style="color: #222;">#{processoBean.processo.id}</span>
+            </div>
+            <div>
+                <span style="font-weight: 600; color: #555;">Tipo de Processo:</span><br/>
+                <span style="color: #1976d2;">#{processoBean.processo.tipoProcesso.nome}</span>
+            </div>
+            <div>
+                <span style="font-weight: 600; color: #555;">Responsável:</span><br/>
+                <span style="color: #1976d2;">#{processoBean.processo.responsavel.nome}</span>
+            </div>
+            <div>
+                <span style="font-weight: 600; color: #555;">Status:</span><br/>
+                <ui:fragment rendered="#{processoBean.processo.status == 'CONCLUIDO'}">
+                    <span class="status-concluido-tag" title="Processo concluído">
+                        <i class="pi pi-check-circle status-ico status-concluido-ico"></i> Concluído
+                    </span>
+                </ui:fragment>
+                <ui:fragment rendered="#{processoBean.processo.status == 'ABERTO'}">
+                    <span class="status-aberto-tag" title="Processo aberto">
+                        <i class="pi pi-folder-open status-ico status-aberto-ico"></i> Aberto
+                    </span>
+                </ui:fragment>
+                <ui:fragment rendered="#{processoBean.processo.status == 'EM_ANDAMENTO'}">
+                    <span class="status-andamento-tag" title="Processo em andamento">
+                        <i class="pi pi-spinner status-ico status-andamento-ico"></i> Em Andamento
+                    </span>
+                </ui:fragment>
+                <ui:fragment rendered="#{processoBean.processo.status == 'PARADO'}">
+                    <span class="status-parado-tag" title="Processo parado">
+                        <i class="pi pi-pause status-ico status-parado-ico"></i> Parado
+                    </span>
+                </ui:fragment>
+                <ui:fragment rendered="#{processoBean.processo.status == 'CANCELADO'}">
+                    <span class="status-cancelado-tag" title="Processo cancelado">
+                        <i class="pi pi-times status-ico status-cancelado-ico"></i> Cancelado
+                    </span>
+                </ui:fragment>
+                <ui:fragment rendered="#{processoBean.processo.status == 'PENDENTE'}">
+                    <span class="status-pendente-tag" title="Processo pendente">
+                        <i class="pi pi-exclamation-triangle status-ico status-pendente-ico"></i> Pendente
+                    </span>
+                </ui:fragment>
+            </div>
+            <div>
+                <span style="font-weight: 600; color: #555;">Data de Criação:</span><br/>
+                <span style="color: #222;"><h:outputText value="#{processoBean.processo.dataCriacao}"><f:converter converterId="localDateTimeConverter"/></h:outputText></span>
+            </div>
+            <div>
+                <span style="font-weight: 600; color: #555;">Data Prev. Finalização:</span><br/>
+                <span style="color: #222;"><h:outputText value="#{processoBean.processo.dataPrevisaoFinalizacao}"><f:converter converterId="localDateConverter"/></h:outputText></span>
+            </div>
+            <div>
+                <span style="font-weight: 600; color: #555;">Valor Total (R$):</span><br/>
+                <span style="color: #388e3c; font-weight: 700;"><h:outputText value="#{processoBean.processo.taxaValorTotal}"><f:convertNumber type="currency" currencySymbol="R$"/></h:outputText></span>
+            </div>
+            <div style="grid-column: 1 / 3;">
+                <span style="font-weight: 600; color: #555;">Descrição:</span><br/>
+                <span style="color: #333;">#{processoBean.processo.descricao}</span>
+            </div>
+            <div style="grid-column: 1 / 3;">
+                <span style="font-weight: 600; color: #555;">Tempo/Duração:</span><br/>
+                <span style="color: #1976d2; font-weight: 700;">#{processoBean.duracaoProcessoFormatada}</span>
+            </div>
+        </div>
+        <p:separator style="margin: 1.5rem 0;"/>
+        <h3 style="color: #1976d2; font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;">Etapas do Processo</h3>
+        <p:outputPanel rendered="#{processoBean.etapasDoProcesso != null and not empty processoBean.etapasDoProcesso}">
+            <ui:repeat value="#{processoBean.etapasDoProcesso}" var="etapa">
+                <div style="background: #fff; border-radius: 8px; box-shadow: 0 1px 6px #0001; padding: 1.1rem 1.3rem; margin-bottom: 1.1rem;">
+                    <div style="display: flex; align-items: center; gap: 1.2rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+                        <span style="font-weight: 600; color: #1976d2; font-size: 1.08rem;">#{etapa.etapaDisponivel.titulo}</span>
+                        <ui:fragment rendered="#{etapa.status == 'CONCLUIDO'}">
+                            <span class="status-concluido-tag" title="Etapa concluída">
+                                <i class="pi pi-check-circle status-ico status-concluido-ico"></i> Concluído
+                            </span>
+                        </ui:fragment>
+                        <ui:fragment rendered="#{etapa.status == 'ABERTO'}">
+                            <span class="status-aberto-tag" title="Etapa aberta">
+                                <i class="pi pi-folder-open status-ico status-aberto-ico"></i> Aberto
+                            </span>
+                        </ui:fragment>
+                        <ui:fragment rendered="#{etapa.status == 'EM_ANDAMENTO'}">
+                            <span class="status-andamento-tag" title="Etapa em andamento">
+                                <i class="pi pi-spinner status-ico status-andamento-ico"></i> Em Andamento
+                            </span>
+                        </ui:fragment>
+                        <ui:fragment rendered="#{etapa.status == 'PARADO'}">
+                            <span class="status-parado-tag" title="Etapa parada">
+                                <i class="pi pi-pause status-ico status-parado-ico"></i> Parado
+                            </span>
+                        </ui:fragment>
+                        <ui:fragment rendered="#{etapa.status == 'CANCELADO'}">
+                            <span class="status-cancelado-tag" title="Etapa cancelada">
+                                <i class="pi pi-times status-ico status-cancelado-ico"></i> Cancelado
+                            </span>
+                        </ui:fragment>
+                        <ui:fragment rendered="#{etapa.status == 'PENDENTE'}">
+                            <span class="status-pendente-tag" title="Etapa pendente">
+                                <i class="pi pi-exclamation-triangle status-ico status-pendente-ico"></i> Pendente
+                            </span>
+                        </ui:fragment>
+                        <span style="color: #888; font-size: 0.98rem; margin-left: 1.2rem;">
+                            <i class="pi pi-calendar"></i>
+                            <h:outputText value="#{etapa.dataPrevisaoFinalizacao}"><f:converter converterId="localDateConverter"/></h:outputText>
+                        </span>
+                        <ui:fragment rendered="#{etapa.dataFinalizacao != null}">
+                            <span style="color: #388e3c; font-size: 0.98rem; margin-left: 1.2rem;">
+                                <i class="pi pi-check-circle"></i>
+                                <strong>Concluída em:</strong>
+                                <h:outputText value="#{etapa.dataFinalizacao}"><f:converter converterId="localDateTimeConverter"/></h:outputText>
+                            </span>
+                        </ui:fragment>
+                    </div>
+                    <p:outputPanel rendered="#{etapa.itens != null and not empty etapa.itens}">
+                        <div style="margin-left: 0.2rem; color: #444;">
+                            <span><strong>Itens:</strong> </span>
+                            <ui:repeat value="#{etapa.itens}" var="item">
+                                <span style="background: #f7f9fa; border-radius: 4px; padding: 0.18rem 0.7rem; margin-right: 0.5rem; color: #1976d2; font-size: 0.98rem; display: inline-block; margin-bottom: 0.3rem;">
+                                    #{item.itemDisponivel.titulo}
+                                    <span style="margin-left: 0.5em; font-size: 0.93em;">
+                                        <i class="pi #{item.concluido ? 'pi-check-circle' : 'pi-clock'}" style="color: #{item.concluido ? '#388e3c' : '#fbc02d'}; margin-right: 0.2em;"></i>
+                                        <span style="color: #{item.concluido ? '#388e3c' : '#fbc02d'}; font-weight: 600;">
+                                            #{item.concluido ? 'Concluído' : 'Pendente'}
+                                        </span>
+                                    </span>
+                                    <ui:fragment rendered="#{item.dataFinalizacao != null}">
+                                        <span style="color: #888; font-size: 0.93em; margin-left: 0.5em;">
+                                            <i class="pi pi-calendar"></i>
+                                            <h:outputText value="#{item.dataFinalizacao}"><f:converter converterId="localDateTimeConverter"/></h:outputText>
+                                        </span>
+                                    </ui:fragment>
+                                </span>
+                            </ui:repeat>
+                        </div>
+                    </p:outputPanel>
+                    <p:outputPanel rendered="#{etapa.itens == null or empty etapa.itens}">
+                        <span style="color: #888; font-size: 0.98rem;">Nenhum item cadastrado nesta etapa.</span>
+                    </p:outputPanel>
+                </div>
+            </ui:repeat>
+        </p:outputPanel>
+        <p:outputPanel rendered="#{processoBean.etapasDoProcesso == null or empty processoBean.etapasDoProcesso}">
+            <span style="color: #888; font-size: 1.08rem;">Nenhuma etapa cadastrada para este processo.</span>
+        </p:outputPanel>
+    </div>
+    <style>
+    .item-concluido-ico {
+        color: #388e3c !important;
+    }
+    .item-pendente-ico {
+        color: #fbc02d !important;
+    }
+    .item-concluido-txt {
+        color: #388e3c !important;
+    }
+    .item-pendente-txt {
+        color: #fbc02d !important;
+    }
+    .status-ico {
+        font-size: 1.1em;
+        vertical-align: middle;
+        margin-right: 0.35em;
+    }
+    .status-concluido-tag {
+        background: #388e3c;
+        color: #fff;
+        border-radius: 6px;
+        font-weight: 600;
+        padding: 0.22rem 0.95rem;
+        margin-right: 0.5em;
+        display: inline-block;
+    }
+    .status-aberto-tag {
+        background: #1976d2;
+        color: #fff;
+        border-radius: 6px;
+        font-weight: 600;
+        padding: 0.22rem 0.95rem;
+        margin-right: 0.5em;
+        display: inline-block;
+    }
+    .status-andamento-tag {
+        background: #fbc02d;
+        color: #222;
+        border-radius: 6px;
+        font-weight: 600;
+        padding: 0.22rem 0.95rem;
+        margin-right: 0.5em;
+        display: inline-block;
+    }
+    .status-parado-tag {
+        background: #e64a19;
+        color: #fff;
+        border-radius: 6px;
+        font-weight: 600;
+        padding: 0.22rem 0.95rem;
+        margin-right: 0.5em;
+        display: inline-block;
+    }
+    .status-cancelado-tag {
+        background: #757575;
+        color: #fff;
+        border-radius: 6px;
+        font-weight: 600;
+        padding: 0.22rem 0.95rem;
+        margin-right: 0.5em;
+        display: inline-block;
+    }
+    .status-pendente-tag {
+        background: #ff9800;
+        color: #222;
+        border-radius: 6px;
+        font-weight: 600;
+        padding: 0.22rem 0.95rem;
+        margin-right: 0.5em;
+        display: inline-block;
+    }
+    /* Legenda UX para status */
+    .legenda-status {
+        margin: 1.2em 0 0.5em 0;
+        font-size: 0.98em;
+        color: #888;
+        display: flex;
+        gap: 1.2em;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    .legenda-status span {
+        display: flex;
+        align-items: center;
+        gap: 0.4em;
+    }
+    </style>
+    <div class="legenda-status">
+        <span><i class="pi pi-check-circle status-ico status-concluido-ico"></i>Concluído</span>
+        <span><i class="pi pi-folder-open status-ico status-aberto-ico"></i>Aberto</span>
+        <span><i class="pi pi-spinner status-ico status-andamento-ico"></i>Em Andamento</span>
+        <span><i class="pi pi-pause status-ico status-parado-ico"></i>Parado</span>
+        <span><i class="pi pi-times status-ico status-cancelado-ico"></i>Cancelado</span>
+        <span><i class="pi pi-exclamation-triangle status-ico status-pendente-ico"></i>Pendente</span>
+    </div>
+</ui:composition>

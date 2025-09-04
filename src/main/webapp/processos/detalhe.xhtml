@@ -1,0 +1,287 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:p="http://primefaces.org/ui" xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:f="http://xmlns.jcp.org/jsf/core" template="/WEB-INF/template.xhtml">
+
+    <f:metadata>
+        <f:viewParam name="processoId" value="#{processoBean.processoId}" converter="javax.faces.Integer" />
+        <f:viewAction action="#{processoBean.carregarProcessoPeloId}" phase="INVOKE_APPLICATION" onPostback="false" />
+    </f:metadata>
+
+    <ui:define name="content">
+        <div class="processo-detalhe-container">
+            <div class="col-12">
+                <p:growl id="detalheMessages" closable="true" />
+
+                <h:form id="detalheForm">
+                    <p:card styleClass="processo-detalhe-card">
+                        <!-- Cabeçalho do Processo -->
+                        <div class="processo-header-corporativo">
+                            <div class="processo-info-principal">
+                                <i class="pi pi-briefcase processo-icon-principal"></i>
+                                <div class="processo-title-section">
+                                    <h2 class="processo-titulo-principal">
+                                        #{processoBean.processo.cliente.razaoSocial}
+                                        <span class="processo-id-badge">ID: #{processoBean.processo.id}</span>
+                                    </h2>
+                                    <span class="processo-tipo-badge">#{processoBean.processo.tipoProcesso.nome}</span>
+                                </div>
+                            </div>
+                            <div class="processo-progress-section">
+                                <p:progressBar value="#{processoBean.porcentagemConclusao}"
+                                    labelTemplate="#{processoBean.porcentagemConclusao}% concluído"
+                                    styleClass="processo-progress-corporativo #{processoBean.porcentagemConclusao ge 50 ? 'progress-label-branco' : 'progress-label-azul'}"
+                                    displayOnly="true" />
+                            </div>
+                        </div>
+
+                        <!-- Renderizar apenas se o processo existir -->
+                        <p:outputPanel rendered="#{processoBean.processo != null and processoBean.processo.id != null}">
+                            <div class="processo-info-grid-corporativo">
+                                <div class="info-field-corporativo">
+                                    <span class="info-label-corporativo">Cliente:</span>
+                                    <span class="info-value-corporativo">#{processoBean.processo.cliente.razaoSocial}</span>
+                                </div>
+                                
+                                <div class="info-field-corporativo">
+                                    <span class="info-label-corporativo">Responsável:</span>
+                                    <span class="info-value-corporativo">#{processoBean.processo.responsavel.nome}</span>
+                                </div>
+                                
+                                <div class="info-field-corporativo">
+                                    <span class="info-label-corporativo">Licenciamento:</span>
+                                    <span class="info-value-corporativo">
+                                        <h:outputText value="#{processoBean.processo.licenciamentoAssociado != null ? processoBean.processo.licenciamentoAssociado.tipo.nome : 'Não associado'}" />
+                                    </span>
+                                </div>
+                                
+                                <div class="info-field-corporativo">
+                                    <span class="info-label-corporativo">Status:</span>
+                                    <p:tag value="#{processoBean.processo.status}" styleClass="#{
+                                       processoBean.processo.status == 'CONCLUIDO' ? 'status-concluido' :
+                                       processoBean.processo.status == 'ABERTO' ? 'status-aberto' :
+                                       processoBean.processo.status == 'EM_ANDAMENTO' ? 'status-andamento' :
+                                       processoBean.processo.status == 'PARADO' ? 'status-parado' :
+                                       processoBean.processo.status == 'CANCELADO' ? 'status-cancelado' :
+                                       processoBean.processo.status == 'PENDENTE' ? 'status-pendente' : ''
+                                   }" />
+                                </div>
+
+                                <div class="info-field-corporativo">
+                                    <span class="info-label-corporativo">Data de Criação:</span>
+                                    <span class="info-value-corporativo">
+                                        <h:outputText value="#{processoBean.processo.dataCriacao}">
+                                            <f:converter converterId="localDateTimeConverter" />
+                                        </h:outputText>
+                                    </span>
+                                </div>
+
+                                <div class="info-field-corporativo">
+                                    <span class="info-label-corporativo">Data Prev. Finalização:</span>
+                                    <span class="info-value-corporativo">
+                                        <h:outputText value="#{processoBean.processo.dataPrevisaoFinalizacao}">
+                                            <f:converter converterId="localDateConverter" />
+                                        </h:outputText>
+                                    </span>
+                                </div>
+
+                                <div class="info-field-corporativo">
+                                    <span class="info-label-corporativo">Valor Total:</span>
+                                    <span class="info-value-monetario">
+                                        <h:outputText value="#{processoBean.processo.taxaValorTotal}">
+                                            <f:convertNumber type="currency" currencySymbol="R$" />
+                                        </h:outputText>
+                                    </span>
+                                </div>
+
+                                <div class="info-field-corporativo">
+                                    <span class="info-label-corporativo">Tempo/Duração:</span>
+                                    <span class="info-value-destaque">#{processoBean.duracaoProcessoFormatada}</span>
+                                </div>
+
+                                <div class="info-field-corporativo info-field-full">
+                                    <span class="info-label-corporativo">Observações:</span>
+                                    <span class="info-value-corporativo">#{processoBean.processo.descricao}</span>
+                                </div>
+                            </div>
+                        </p:outputPanel>
+
+                        <!-- Mensagem quando processo não está carregado -->
+                        <p:outputPanel rendered="#{processoBean.processo == null or processoBean.processo.id == null}">
+                            <p:panel styleClass="ui-messages ui-messages-warn">
+                                <p:outputLabel
+                                    value="⚠️ Aviso: Dados do processo não carregados. Verifique se o ID foi informado corretamente na URL." />
+                            </p:panel>
+                        </p:outputPanel>
+
+                        <p:separator />
+
+                        <h3
+                            style="margin-top: 0; color: #1976d2; font-size: 1.5rem; font-weight: 700; letter-spacing: -1px;">
+                            <i class="pi pi-chart-line" style="margin-right: .5rem;"></i>Fluxo do Processo
+                        </h3>
+
+                        <!-- Timeline visual personalizada -->
+                        <p:outputPanel
+                            rendered="#{processoBean.etapasDoProcesso != null and not empty processoBean.etapasDoProcesso}">
+                            <div class="custom-timeline" style="margin-top: 1.5rem;">
+                                <p:dataList value="#{processoBean.etapasDoProcesso}" var="etapa" itemType="none"
+                                    styleClass="timeline-container" style="gap: 1.5rem;">
+
+                                    <div class="timeline-item #{etapa.status == 'CONCLUIDO' ? 'completed' : 'pending'}"
+                                        style="background: #f8fafd; border-radius: 12px; box-shadow: 0 2px 8px 0 rgba(25,118,210,0.07); padding: 1.2rem 1.5rem;">
+                                        <div class="timeline-marker">
+                                            <i class="pi #{etapa.status == 'CONCLUIDO' ? 'pi-check' : 'pi-circle'}" />
+                                        </div>
+
+                                        <div class="timeline-content">
+                                            <p:card styleClass="etapa-card"
+                                                style="box-shadow: none; background: transparent;">
+                                                <div class="etapa-header"
+                                                    style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                                                    <h4
+                                                        style="margin: 0; font-size: 1.2rem; color: #1976d2; font-weight: 700;">
+                                                        #{etapa.etapaDisponivel.titulo}
+                                                    </h4>
+                                                    <p:tag value="#{etapa.status}" styleClass="#{
+                                                       etapa.status == 'CONCLUIDO' ? 'status-concluido' :
+                                                       etapa.status == 'ABERTO' ? 'status-aberto' :
+                                                       etapa.status == 'EM_ANDAMENTO' ? 'status-andamento' :
+                                                       etapa.status == 'PARADO' ? 'status-parado' :
+                                                       etapa.status == 'CANCELADO' ? 'status-cancelado' :
+                                                       etapa.status == 'PENDENTE' ? 'status-pendente' :
+                                                       ''
+                                                   }"
+                                                        style="font-size: 0.95rem; font-weight: 600; border-radius: 6px; padding: 0.2rem 0.8rem;" />
+                                                    <p:commandButton value="Iniciar Etapa" icon="pi pi-play"
+                                                        rendered="#{etapa.status.name() == 'ABERTO'}"
+                                                        actionListener="#{processoBean.iniciarEtapa(etapa)}"
+                                                        update="@form detalheMessages"
+                                                        styleClass="ui-button-success ui-button-sm"
+                                                        style="margin-left:1rem;" />
+
+                                                </div>
+
+                                                <!-- Listagem dos itens da etapa -->
+                                                <p:outputPanel rendered="#{not empty etapa.itens}">
+                                                    <p:dataTable value="#{etapa.itens}" var="itemEtapa"
+                                                        styleClass="etapa-itens-table" style="margin-bottom: 1rem;">
+                                                        <p:column headerText="Item">
+                                                            <h:outputText value="#{itemEtapa.itemDisponivel.titulo}" />
+                                                        </p:column>
+                                                        <p:column headerText="Concluído"
+                                                            style="text-align:center; width: 100px;">
+                                                            <p:selectBooleanCheckbox value="#{itemEtapa.concluido}"
+                                                                disabled="#{etapa.status == 'CONCLUIDO'}" itemLabel=""
+                                                                style="margin-left: 0.5rem;">
+                                                                <p:ajax event="change"
+                                                                    listener="#{processoBean.atualizarStatusItemEtapa(itemEtapa)}"
+                                                                    update="@form detalheMessages" />
+                                                            </p:selectBooleanCheckbox>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:outputPanel>
+
+                                                <div class="etapa-details" style="margin-bottom: 0.7rem; color: #444;">
+                                                    <p:outputPanel rendered="#{etapa.dataPrevisaoFinalizacao != null}">
+                                                        <p><i class="pi pi-calendar"></i>
+                                                            <strong>Prazo:</strong>
+                                                            <h:outputText value="#{etapa.dataPrevisaoFinalizacao}">
+                                                                <f:converter converterId="localDateConverter" />
+                                                            </h:outputText>
+                                                        </p>
+                                                    </p:outputPanel>
+
+                                                    <p:outputPanel rendered="#{etapa.dataFinalizacao != null}">
+                                                        <p><i class="pi pi-check-circle"></i>
+                                                            <strong>Concluído em:</strong>
+                                                            <h:outputText value="#{etapa.dataFinalizacao}">
+                                                                <f:converter converterId="localDateTimeConverter" />
+                                                            </h:outputText>
+                                                        </p>
+                                                    </p:outputPanel>
+                                                </div>
+
+                                                <!-- Ações da etapa -->
+                                                <div class="etapa-actions" style="display: flex; gap: 0.7rem;">
+                                                    <p:commandButton value="Concluir" icon="pi pi-check"
+                                                        rendered="#{etapa.status != 'CONCLUIDO'}"
+                                                        styleClass="ui-button-success ui-button-sm"
+                                                        actionListener="#{processoBean.concluirEtapa(etapa)}"
+                                                        update="@form detalheMessages" />
+                                                    <p:commandButton value="Reabrir" icon="pi pi-refresh"
+                                                        rendered="#{etapa.status == 'CONCLUIDO'}"
+                                                        styleClass="ui-button-warning ui-button-sm"
+                                                        actionListener="#{processoBean.reabrirEtapa(etapa)}"
+                                                        update="@form detalheMessages" />
+                                                    <p:button value="Adicionar Item" icon="pi pi-plus"
+                                                        rendered="#{etapa.status != 'CONCLUIDO'}"
+                                                        styleClass="ui-button-info ui-button-sm"
+                                                        outcome="/processos/adicionarItemEtapa.xhtml?faces-redirect=true&amp;etapaId=#{etapa.id}" />
+                                                </div>
+                                            </p:card>
+                                        </div>
+                                    </div>
+                                </p:dataList>
+                            </div>
+                        </p:outputPanel>
+
+                        <!-- Lista simples quando não há etapas ou como fallback -->
+                        <p:outputPanel
+                            rendered="#{processoBean.etapasDoProcesso == null or empty processoBean.etapasDoProcesso}">
+                            <p:card styleClass="empty-state-card">
+                                <div class="empty-state">
+                                    <i class="pi pi-info-circle" style="font-size: 3rem; color: #6c757d;"></i>
+                                    <h4>Nenhuma etapa configurada</h4>
+                                    <p>Este processo ainda não possui etapas definidas.</p>
+                                    <p:commandButton value="Configurar Etapas" action="#{processoBean.configurarEtapas}"
+                                        icon="pi pi-cog" styleClass="ui-button-info ui-button-raised ui-button-lg"
+                                        style="font-size: 1.13rem; padding: 0.85rem 2.2rem; border-radius: 8px; font-weight: 700; box-shadow: 0 2px 8px 0 rgba(25,118,210,0.10);" />
+                                </div>
+                            </p:card>
+                        </p:outputPanel>
+
+                        <p:separator />
+
+                        <!-- Ações do Processo -->
+                        <div class="processo-actions-section">
+                            <h4 class="actions-title">
+                                <i class="pi pi-cog"></i>Ações
+                            </h4>
+                            <div class="actions-buttons-container">
+                                <p:button value="Imprimir Relatório" icon="pi pi-print" 
+                                    styleClass="ui-button-secondary ui-corporativo-btn"
+                                    outcome="/processos/relatorioProcessoImpressao.xhtml"
+                                    target="_blank"
+                                    rendered="#{processoBean.processo != null and processoBean.processo.id != null}">
+                                    <f:param name="processoId" value="#{processoBean.processo.id}" />
+                                </p:button>
+                                <p:commandButton value="Finalizar Processo" icon="pi pi-check"
+                                    styleClass="ui-button-success ui-corporativo-btn"
+                                    rendered="#{processoBean.processo != null and processoBean.processo.status != 'CONCLUIDO'}"
+                                    actionListener="#{processoBean.finalizarProcesso}" update="@form detalheMessages"
+                                    onclick="return confirm('Deseja realmente finalizar este processo?')" />
+                                <p:commandButton value="Reabrir Processo" icon="pi pi-refresh"
+                                    styleClass="ui-button-warning ui-corporativo-btn"
+                                    rendered="#{processoBean.processo != null and processoBean.processo.status == 'CONCLUIDO'}"
+                                    actionListener="#{processoBean.reabrirProcesso}" update="@form detalheMessages" />
+                            </div>
+                        </div>
+                        <!-- Dialog de Relatório do Processo -->
+                        <p:dialog id="relatorioDialog" widgetVar="relatorioDialog" modal="true" closable="true" showEffect="fade" hideEffect="fade"
+                            header="Relatório do Processo" style="max-width: 940px; width: 98vw; border-radius: 14px;" responsive="true">
+                            <div style="max-height: 70vh; overflow-y: auto;">
+                                <ui:include src="relatorioProcesso.xhtml" />
+                            </div>
+                        </p:dialog>
+
+                        <p:button value="← Voltar para Processos" icon="pi pi-arrow-left" outcome="/processos/lista"
+                            styleClass="ui-button-outlined ui-corporativo-btn botao-voltar-corporativo" />
+                    </p:card>
+                </h:form>
+            </div>
+        </div>
+
+        <h:outputScript name="js/subirTela.js" />
+    </ui:define>
+
+</ui:composition>

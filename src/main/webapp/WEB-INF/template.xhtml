@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<h:head>
+    <title>Sistema de Processos</title>
+    <link rel="icon" type="image/png" href="#{resource['resources/image/image.png']}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <!-- PrimeFlex CSS removido - não disponível no projeto -->
+    <h:outputStylesheet name="css/layout.css" />
+    <style>
+        /* Sidebar recolhida: largura menor, só ícones */
+        .layout-sidebar.collapsed {
+            width: 60px !important;
+            min-width: 60px !important;
+            max-width: 60px !important;
+            overflow-x: hidden;
+            transition: width 0.3s;
+        }
+        .layout-sidebar.collapsed .ui-menuitem-text {
+            display: none !important;
+        }
+        .layout-sidebar.collapsed .ui-menuitem-icon {
+            margin-right: 0 !important;
+            font-size: 1.4em;
+        }
+        .sidebar-toggle-btn {
+            background: none;
+            border: none;
+            color: #1976d2;
+            font-size: 1.5em;
+            cursor: pointer;
+            margin: 10px 0 10px 10px;
+            outline: none;
+        }
+    </style>
+    <h:outputScript library="js" name="locale.primefaces.js" />
+</h:head>
+<h:body class="layout-wrapper">
+    <ui:include src="header.xhtml" />
+    <p:growl id="messages" widgetVar="messages" showDetail="true"/>
+    <!-- Container Principal com Sidebar e Conteúdo -->
+    <div class="layout-container">
+        <!-- Menu Lateral -->
+        <div class="layout-sidebar">
+        <button class="sidebar-toggle-btn" type="button" onclick="BPMLayout.toggleSidebarCollapse()" title="Recolher/Expandir menu">
+            <i class="pi pi-angle-double-left"></i>
+        </button>
+        <script>
+            // Aplica o estado salvo do menu (collapsed/expanded) ao carregar
+            document.addEventListener('DOMContentLoaded', function() {
+                var sidebar = document.querySelector('.layout-sidebar');
+                var icon = document.querySelector('.sidebar-toggle-btn i');
+                var collapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+                if (sidebar) {
+                    if (collapsed) {
+                        sidebar.classList.add('collapsed');
+                        if (icon) {
+                            icon.classList.remove('pi-angle-double-left');
+                            icon.classList.add('pi-angle-double-right');
+                        }
+                    }
+                }
+            });
+        </script>
+        <h:form>
+            <p:menu>
+                <p:menuitem value="Dashboard" outcome="/dashboard" icon="pi pi-home" title="Dashboard" />
+                <p:menuitem value="Clientes" outcome="/clientes/lista" icon="pi pi-briefcase" title="Clientes" />
+                <p:menuitem value="Processos" outcome="/processos/lista" icon="pi pi-sitemap" title="Processos" />
+                <p:menuitem value="Tipos de Processo" outcome="/tiposprocesso/lista" icon="pi pi-tags" title="Tipos de Processo"  />
+                <p:menuitem value="Etapas Disponíveis" outcome="/etapasdisponiveis/lista" icon="pi pi-list" title="Etapas Disponíveis para processos" />
+                <p:menuitem value="Itens Disponíveis" outcome="/itensdisponiveis/lista" icon="pi pi-check-square" title="Itens Disponíveis para Etapas"  />
+                <p:menuitem value="Licenciamentos" outcome="/licenciamentos/lista" icon="pi pi-id-card" title="Licenciamentos" />
+                <p:menuitem value="Tipos de Licenciamento" outcome="/tiposlicenciamento/lista" icon="pi pi-file" title="Tipos de Licenciamento" />
+                <p:menuitem value="Relatórios" icon="pi pi-chart-bar" outcome="/relatorios/lista" rendered="#{loginBean.usuarioLogado.perfil eq 'ADMINISTRADOR'}" title="Relatórios" />
+                <p:menuitem value="Usuários" outcome="/usuarios/lista" icon="pi pi-users" rendered="#{loginBean.usuarioLogado.perfil eq 'ADMINISTRADOR'}" title="Usuários" />
+            </p:menu>
+        </h:form>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="layout-main-content">
+            <ui:insert name="content">Página de conteúdo aqui</ui:insert>
+        </div>
+    </div>
+	<h:outputScript>
+		// Função para scroll suave ao topo quando há mensagens de erro
+		function handleSaveComplete(args) {
+			if ((args &amp;&amp; args.validationFailed) || 
+				(PrimeFaces.widgets['messagesWidget'] &amp;&amp; 
+				 PrimeFaces.widgets['messagesWidget'].jq.find('.ui-message-error').length > 0)) {
+				window.scrollTo({ top: 0, behavior: 'smooth' });
+			}
+		}
+
+		// Controle do loader
+		window.addEventListener('beforeunload', function () {
+			const loader = document.getElementById('loader');
+			if (loader) {
+				loader.style.display = 'flex';
+			}
+		});
+	</h:outputScript>
+    <h:outputScript name="js/layout.js"/>
+    <h:outputScript>
+        // Função global para recolher/expandir sidebar com persistência
+        BPMLayout.toggleSidebarCollapse = function() {
+            var sidebar = document.querySelector('.layout-sidebar');
+            var icon = document.querySelector('.sidebar-toggle-btn i');
+            if (sidebar) {
+                var collapsed = sidebar.classList.toggle('collapsed');
+                localStorage.setItem('sidebar-collapsed', collapsed);
+                if (icon) {
+                    if (collapsed) {
+                        icon.classList.remove('pi-angle-double-left');
+                        icon.classList.add('pi-angle-double-right');
+                    } else {
+                        icon.classList.remove('pi-angle-double-right');
+                        icon.classList.add('pi-angle-double-left');
+                    }
+                }
+            }
+        };
+    </h:outputScript>
+</h:body>
+</html>
+
+

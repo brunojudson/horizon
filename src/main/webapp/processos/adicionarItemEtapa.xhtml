@@ -1,0 +1,47 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      template="/WEB-INF/template.xhtml">
+
+<ui:define name="content">
+    <f:metadata>
+        <f:viewAction action="#{processoBean.carregarEtapaParaAdicionarItem}" phase="INVOKE_APPLICATION" onPostback="false" />
+    </f:metadata>
+    <div class="grid">
+        <div class="col-12">
+            <h:form id="adicionarItemForm">
+                <p:messages id="msg" showDetail="true" closable="true" />
+                <p:card style="box-shadow: 0 4px 24px 0 rgba(0,0,0,0.10); border-radius: 18px; padding: 2rem 2rem 2.5rem 2rem; background: #fff; max-width: 520px; margin: 0 auto;">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem;">
+                        <i class="pi pi-plus-circle" style="font-size: 2.2rem; color: #1976d2;"></i>
+                        <div>
+                            <h2 style="margin: 0; font-size: 2rem; color: #222; font-weight: 700; letter-spacing: -1px;">Adicionar Item à Etapa</h2>
+                            <h:panelGroup rendered="#{not empty processoBean.etapaParaAdicionarItem}">
+                                <span style="font-size: 1.1rem; color: #888; font-weight: 400;">Etapa: <b style="color:#1976d2;">#{processoBean.etapaParaAdicionarItem.etapaDisponivel.titulo}</b></span>
+                            </h:panelGroup>
+                        </div>
+                    </div>
+                    <p:separator style="margin: 1.2rem 0;"/>
+                    <div class="ui-fluid" style="margin-bottom: 1.5rem;">
+                        <p:outputLabel value="Selecione o Item:" for="itemDisponivel" style="font-weight:600;" />
+                        <p:selectOneMenu id="itemDisponivel" value="#{processoBean.itemDisponivelIdSelecionado}" required="true" style="width:100%; max-width:350px;">
+                            <f:selectItem itemLabel="Selecione..." itemValue="" />
+                            <f:selectItems value="#{processoBean.itemDisponiveisParaEtapa}" var="item"
+                                itemValue="#{item.id}" itemLabel="#{item.titulo}" />
+                        </p:selectOneMenu>
+                    </div>
+                    <div style="display: flex; gap: 1.2rem; margin-top: 2rem;">
+                        <p:button value="Voltar" icon="pi pi-arrow-left" outcome="/processos/detalhe?faces-redirect=true&amp;processoId=#{processoBean.etapaParaAdicionarItem.processo.id}"
+                            styleClass="ui-button-secondary ui-button-outlined" style="min-width: 140px; font-size: 1.08rem;" />
+                        <p:commandButton value="Adicionar" icon="pi pi-plus" actionListener="#{processoBean.salvarNovoItemEtapa}"
+                            update="@form" styleClass="ui-button-success" style="min-width: 140px; font-size: 1.08rem;" />
+                    </div>
+                </p:card>
+            </h:form>
+        </div>
+    </div>
+</ui:define>
+
+</ui:composition>

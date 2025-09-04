@@ -1,0 +1,226 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:p="http://primefaces.org/ui" xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:f="http://xmlns.jcp.org/jsf/core" template="/WEB-INF/template.xhtml">
+
+    <ui:define name="content">
+        <div class="table-container">
+            <h:form id="headerForm">
+            <p:growl id="dialogMessages" showDetail="true" closable="true" />
+                <div class="table-header">
+                    <h2 class="table-title">
+                        <i class="pi pi-check-square" style="margin-right: .5rem;"></i>
+                        Gestão de Itens Disponíveis
+                    </h2>
+                    <div class="table-actions">
+                        <p:commandButton value="Novo Item Disponível" icon="pi pi-plus"
+                            actionListener="#{itemDisponivelBean.novoItemDisponivel()}"
+                            update=":headerForm:dialogMessages :itemDisponivelListForm:manageItemDisponivelDialog"
+                            oncomplete="PF('manageItemDisponivelDialog').show()" process="@this"
+                            styleClass="ui-button-success ui-corporativo-btn" />
+                    </div>
+                </div>
+            </h:form>
+
+            <div class="card-body">
+                <h:form id="itemDisponivelListForm">
+                    
+                    <p:dataTable id="dt-itensDisponiveis" widgetVar="dtItensDisponiveis" var="id"
+                        value="#{itemDisponivelBean.itensDisponiveis}"
+                        globalFilterFunction="#{itemDisponivelBean.globalFilterFunction}"
+                        reflow="true" styleClass="products-table"
+                        paginator="true" rows="10" paginatorPosition="bottom" emptyMessage="Nenhum item encontrado">
+                        <f:facet name="header">
+							<div style="display: flex; justify-content: space-between; align-items: center;">
+								<h:outputText value="Lista de Itens" style="font-weight: 600; color: #37474f;" />
+								<div style="display: flex; align-items: center; gap: 0.5em;">
+									<h:outputText value="Buscar: " style="font-weight: 600; color: #37474f;" />
+									<p:inputText id="globalFilter" onkeyup="PF('dtItensDisponiveis').filter()"
+										placeholder="Digite para buscar..." style="width:200px" />
+								</div>
+							</div>
+						</f:facet>
+                        <p:column headerText="ID" sortBy="id" style="width: 100px;">
+                            <h:outputText value="#{id.id}" />
+                        </p:column>
+                        <p:column headerText="Título" sortBy="titulo">
+                            <h:outputText value="#{id.titulo}" />
+                        </p:column>
+                        <p:column headerText="Descrição" sortBy="descricao">
+                            <h:outputText value="#{id.descricao}" />
+                        </p:column>
+
+                        <p:column exportable="false" headerText="Ações" style="text-align: center; width: 100px;">
+                            <div style="display: flex; justify-content: center; align-items: center; gap: 0.5rem;">
+                                <p:commandButton icon="pi pi-pencil" title="Editar"
+                                    actionListener="#{itemDisponivelBean.carregarItemDisponivel(id)}"
+                                    update=":headerForm:dialogMessages :itemDisponivelListForm:manageItemDisponivelDialog"
+                                    oncomplete="PF('manageItemDisponivelDialog').show()" process="@this"
+                                    styleClass="ui-button-rounded ui-button-warning ui-button-sm" />
+                                <p:commandButton icon="pi pi-trash" title="Excluir"
+                                    actionListener="#{itemDisponivelBean.deletarItemDisponivel(id)}"
+                                    update="dt-itensDisponiveis messages"
+                                    styleClass="ui-button-rounded ui-button-danger ui-button-sm"
+                                    onclick="return confirm('Deseja realmente excluir este item?')" />
+                            </div>
+                        </p:column>
+                    </p:dataTable>
+
+                    <p:dialog id="manageItemDisponivelDialog" header=""
+                        showEffect="fade" modal="true" widgetVar="manageItemDisponivelDialog" responsive="true" closeOnEscape="true"
+                        width="750" 
+                        position="center"
+                        style="border-radius:12px; max-height: 90vh;">
+                        <p:panel styleClass="ui-panel ui-panel-corporativo" style="background: #fafbfc; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 0;">
+                            <f:facet name="header">
+                                <div style="display:flex; align-items:center; gap:0.8em; padding: 1.5em 1.5em 0.5em 1.5em;">
+                                    <i class="pi pi-check-square" style="font-size:1.6em; color:#1976d2;"></i>
+                                    <span style="font-size:1.4em; font-weight:600; color:#263238; letter-spacing:0.3px;">Cadastro de Item Disponível</span>
+                                </div>
+                            </f:facet>
+                            <h:form id="itemDisponivelDetailForm">
+                                <div class="form-container">
+                                    <div class="dialog-grid-corporativo">
+                                        <div class="grid-item grid-item-full">
+                                            <p:outputLabel for="titulo" value="Título " />
+                                            <p:inputText id="titulo" value="#{itemDisponivelBean.itemDisponivel.titulo}"
+                                                required="true" placeholder="Digite o título do item" styleClass="ui-inputfield-corporativo" />
+                                        </div>
+                                        <div class="grid-item grid-item-full">
+                                            <p:outputLabel for="descricao" value="Descrição" />
+                                            <p:inputTextarea id="descricao" value="#{itemDisponivelBean.itemDisponivel.descricao}"
+                                                rows="4" placeholder="Digite uma descrição (opcional)"
+                                                styleClass="ui-inputfield-corporativo" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="dialog-footer-corporativo">
+                                    <p:commandButton value="Cancelar" icon="pi pi-times"
+                                        onclick="PF('manageItemDisponivelDialog').hide(); return false;"
+                                        styleClass="ui-button-secondary ui-button-outlined"
+                                        style="min-width: 110px; padding: 0.75em 1.5em; border-radius: 8px; border: 2px solid #64748b; color: #64748b; background: white; font-weight: 500; transition: all 0.2s ease;"
+                                        immediate="true" />
+                                    <p:commandButton value="#{itemDisponivelBean.itemDisponivel != null and itemDisponivelBean.itemDisponivel.id != null ? 'Atualizar' : 'Cadastrar'}" icon="pi pi-check"
+                                        actionListener="#{itemDisponivelBean.salvarItemDisponivel()}"
+                                        update=":headerForm:dialogMessages :itemDisponivelListForm:dt-itensDisponiveis"
+                                        process="@form"
+                                        oncomplete="if(!args.validationFailed) PF('manageItemDisponivelDialog').hide();"
+                                        styleClass="ui-button-success"
+                                        style="min-width: 110px; padding: 0.75em 1.5em; border-radius: 8px; background: linear-gradient(135deg, #1976d2, #1565c0); border: none; color: white; font-weight: 600; box-shadow: 0 4px 12px rgba(25,118,210,0.3); transition: all 0.2s ease;" />
+                                </div>
+                            </h:form>
+                        </p:panel>
+                        <style>
+                            .dialog-grid-corporativo {
+                                display: grid;
+                                grid-template-columns: 1fr 1fr;
+                                gap: 1.2em 1.8em;
+                                margin-bottom: 1em;
+                                margin-top: 0.8em;
+                                align-items: end;
+                            }
+                            
+                            .dialog-grid-corporativo .grid-item {
+                                display: flex;
+                                flex-direction: column;
+                                gap: 0.4em;
+                            }
+                            
+                            .dialog-grid-corporativo .grid-item-full {
+                                grid-column: 1 / 3;
+                            }
+                            
+                            .dialog-grid-corporativo .ui-outputlabel {
+                                font-weight: 600;
+                                color: #37474f;
+                                font-size: 0.95em;
+                                margin-bottom: 0.3em;
+                            }
+                            
+                            .ui-inputfield-corporativo {
+                                width: 100%;
+                                border-radius: 8px;
+                                border: 1px solid #cfd8dc;
+                                background: #fff;
+                                padding: 0.65em 0.8em;
+                                font-size: 0.95em;
+                                box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+                                transition: all 0.2s ease;
+                                min-height: 2.5em;
+                                box-sizing: border-box;
+                            }
+                            
+                            .ui-inputfield-corporativo:focus {
+                                border-color: #1976d2;
+                                outline: none;
+                                box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+                            }
+                            
+                            .ui-panel-corporativo {
+                                border: none;
+                            }
+                            
+                        .ui-dialog .ui-dialog-content {
+                            padding: 0;
+                        }
+                        
+                        /* Calendar field fixes */
+                        .ui-calendar.ui-inputfield-corporativo {
+                            border: none;
+                            border-radius: 8px;
+                            background: #fff;
+                            padding: 0;
+                            box-shadow: none;
+                        }
+                        
+                        .ui-calendar.ui-inputfield-corporativo .ui-inputtext {
+                            border: none;
+                            box-shadow: none;
+                            padding: 0.65em 0.8em;
+                            border-radius: 8px 0 0 8px;
+                        }
+                        
+                        .ui-calendar.ui-inputfield-corporativo .ui-datepicker-trigger {
+                            border: none;
+                            background: #f8f9fa;
+                            border-radius: 0 8px 8px 0;
+                            color: #1976d2;
+                        }
+                        
+                        .ui-calendar.ui-inputfield-corporativo:focus-within {
+                            border: none;
+                            box-shadow: none;
+                        }                            @media (max-width: 768px) {
+                                .dialog-grid-corporativo {
+                                    grid-template-columns: 1fr;
+                                    gap: 1em;
+                                }
+                                .dialog-grid-corporativo .grid-item-full {
+                                    grid-column: 1;
+                                }
+                            }
+                            
+                            /* Hover effects for buttons */
+                            .ui-button-secondary.ui-button-outlined:hover {
+                                background: #64748b !important;
+                                color: white !important;
+                                transform: translateY(-1px);
+                                box-shadow: 0 4px 12px rgba(100,116,139,0.3) !important;
+                            }
+                            
+                            .ui-button-success:hover {
+                                transform: translateY(-1px);
+                                box-shadow: 0 6px 16px rgba(25,118,210,0.4) !important;
+                            }
+                            
+                            /* Focus effects */
+                            .ui-inputfield-corporativo:focus {
+                                transform: translateY(-1px);
+                                box-shadow: 0 6px 20px rgba(25,118,210,0.15) !important;
+                            }
+                        </style>
+                    </p:dialog>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

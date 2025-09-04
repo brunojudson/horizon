@@ -1,0 +1,300 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:p="http://primefaces.org/ui" xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:f="http://xmlns.jcp.org/jsf/core" template="/WEB-INF/template.xhtml">
+
+    <ui:define name="content">
+        <style>
+            .ui-inputfield-corporativo {
+                padding: none !important;
+            }
+        </style>
+
+        <div class="table-container">
+            <div class="table-header">
+                <h2 class="table-title">
+                    <i class="pi pi-users" style="margin-right: .5rem;"></i>
+                    Gestão de Clientes
+                </h2>
+                <div class="table-actions">
+                    <h:form id="headerClienteForm">
+                        <p:commandButton value="Novo Cliente" icon="pi pi-plus"
+                            actionListener="#{clienteBean.novoCliente()}" update=":clienteDialogForm"
+                            oncomplete="PF('manageClienteDialog').show()"
+                            styleClass="ui-button-success ui-corporativo-btn" />
+                    </h:form>
+                </div>
+            </div>
+            <div class="card-body">
+                <h:form id="clienteListForm">
+                    <p:growl id="messages" closable="true" />
+                    <p:dataTable id="dt-clientes" var="cli" value="#{clienteBean.clientes}"
+                        filteredValue="#{clienteBean.clientesFilter}" reflow="true" styleClass="products-table"
+                        paginator="true" rows="10" paginatorPosition="bottom" emptyMessage="Nenhum cliente encontrado"
+                        widgetVar="clientesTable" globalFilterFunction="#{clienteBean.globalFilterFunction}">
+
+                        <f:facet name="header">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h:outputText value="Lista de Clientes" style="font-weight: 600; color: #37474f;" />
+                                <div style="display: flex; align-items: center; gap: 0.5em;">
+                                    <h:outputText value="Buscar: " style="font-weight: 600; color: #37474f;" />
+                                    <p:inputText id="globalFilter" onkeyup="PF('clientesTable').filter()"
+                                        placeholder="Digite para buscar..." style="width:200px" />
+                                </div>
+                            </div>
+                        </f:facet>
+                        <p:column headerText="ID" sortBy="id" width="60">
+                            <h:outputText value="#{cli.id}" />
+                        </p:column>
+                        <p:column headerText="Tipo" sortBy="tipoPessoa">
+                            <h:outputText value="#{cli.tipoPessoa}" />
+                        </p:column>
+                        <p:column headerText="CNPJ/CPF" sortBy="documento">
+                            <h:outputText value="#{cli.documento}" />
+                        </p:column>
+                        <p:column headerText="Razão Social" sortBy="#{cli.razaoSocial}">
+                            <h:outputText value="#{cli.razaoSocial}" />
+                        </p:column>
+                        <p:column headerText="Nome Fantasia" sortBy="#{cli.nomeFantasia}">
+                            <h:outputText value="#{cli.nomeFantasia}" />
+                        </p:column>
+                        <p:column headerText="Status" sortBy="ativo">
+                            <p:tag value="#{cli.ativo ? 'Ativo' : 'Inativo'}"
+                                severity="#{cli.ativo ? 'success' : 'danger'}"
+                                icon="#{cli.ativo ? 'pi pi-check' : 'pi pi-times'}" styleClass="tag-status-cliente" />
+                        </p:column>
+                        <p:column exportable="false" headerText="Ações" width="120">
+                            <div style="display: flex; gap: 0.5rem;">
+                                <p:commandButton icon="pi pi-pencil" title="Editar"
+                                    actionListener="#{clienteBean.selecionarCliente(cli)}"
+                                    oncomplete="PF('manageClienteDialog').show()" update=":clienteDialogForm"
+                                    styleClass="ui-button-rounded ui-button-warning ui-button-sm" />
+                                <p:commandButton icon="pi pi-trash" title="Excluir"
+                                    actionListener="#{clienteBean.deletarCliente(cli)}" update="dt-clientes messages"
+                                    styleClass="ui-button-rounded ui-button-danger ui-button-sm"
+                                    onclick="return confirm('Deseja realmente excluir este cliente?')" />
+                            </div>
+                        </p:column>
+                    </p:dataTable>
+                </h:form>
+            </div>
+        </div>
+
+        <h:form id="clienteDialogForm">
+            <p:dialog id="manageClienteDialog" header="" closeOnEscape="true" widgetVar="manageClienteDialog"
+                modal="true" width="900" position="center" style="border-radius:12px; max-height: 90vh;">
+                <p:panel styleClass="ui-panel ui-panel-corporativo"
+                    style="background: #fafbfc; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 0;">
+                    <f:facet name="header">
+                        <div style="display:flex; align-items:center; gap:0.8em; padding: 1.5em 1.5em 0.5em 1.5em;">
+                            <i class="pi pi-user-edit" style="font-size:1.6em; color:#1976d2;"></i>
+                            <span
+                                style="font-size:1.4em; font-weight:600; color:#263238; letter-spacing:0.3px;">Cadastro
+                                de Cliente</span>
+                        </div>
+                    </f:facet>
+                    <div class="form-container">
+                        <div class="dialog-grid-corporativo-cliente">
+                            <div class="grid-item">
+                                <p:outputLabel for="tipoPessoa" value="Tipo Pessoa " />
+                                <p:selectOneMenu id="tipoPessoa" value="#{clienteBean.cliente.tipoPessoa}"
+                                    required="true" styleClass="ui-inputfield-corporativo">
+                                    <f:selectItem itemLabel="Selecione" itemValue="#{null}" />
+                                    <f:selectItem itemLabel="Física" itemValue="FISICA" />
+                                    <f:selectItem itemLabel="Jurídica" itemValue="JURIDICA" />
+                                </p:selectOneMenu>
+                            </div>
+                            <div class="grid-item">
+                                <p:outputLabel for="documento" value="CNPJ/CPF " />
+                                <p:inputText id="documento" value="#{clienteBean.cliente.documento}" required="true"
+                                    styleClass="ui-inputfield-corporativo" />
+                            </div>
+                            <div class="grid-item">
+                                <p:outputLabel for="razaoSocial" value="Razão Social " />
+                                <p:inputText id="razaoSocial" value="#{clienteBean.cliente.razaoSocial}" required="true"
+                                    styleClass="ui-inputfield-corporativo" />
+                            </div>
+                            <div class="grid-item">
+                                <p:outputLabel for="nomeFantasia" value="Nome Fantasia" />
+                                <p:inputText id="nomeFantasia" value="#{clienteBean.cliente.nomeFantasia}"
+                                    styleClass="ui-inputfield-corporativo" />
+                            </div>
+                            <div class="grid-item">
+                                <p:outputLabel for="telefone" value="Telefone" />
+                                <p:inputText id="telefone" value="#{clienteBean.cliente.telefone}"
+                                    styleClass="ui-inputfield-corporativo" />
+                            </div>
+                            <div class="grid-item">
+                                <p:outputLabel for="email" value="E-mail" />
+                                <p:inputText id="email" value="#{clienteBean.cliente.email}"
+                                    styleClass="ui-inputfield-corporativo" />
+                            </div>
+                            <div class="grid-item">
+                                <p:outputLabel for="logradouro" value="Endereço" />
+                                <p:inputText id="logradouro" value="#{clienteBean.cliente.logradouro}"
+                                    styleClass="ui-inputfield-corporativo" />
+                            </div>
+                            <div class="grid-item">
+                                <p:outputLabel for="numero" value="Número" />
+                                <p:inputText id="numero" value="#{clienteBean.cliente.numero}"
+                                    styleClass="ui-inputfield-corporativo" />
+                            </div>
+                            <div class="grid-item">
+                                <p:outputLabel for="bairro" value="Bairro" />
+                                <p:inputText id="bairro" value="#{clienteBean.cliente.bairro}"
+                                    styleClass="ui-inputfield-corporativo" />
+                            </div>
+                            <div class="grid-item">
+                                <p:outputLabel for="cidade" value="Cidade" />
+                                <p:inputText id="cidade" value="#{clienteBean.cliente.cidade}"
+                                    styleClass="ui-inputfield-corporativo" />
+                            </div>
+                            <div class="grid-item">
+                                <p:outputLabel for="uf" value="UF" />
+                                <p:inputText id="uf" value="#{clienteBean.cliente.uf}" maxlength="2"
+                                    styleClass="ui-inputfield-corporativo" />
+                            </div>
+                            <div class="grid-item">
+                                <p:outputLabel for="cep" value="CEP" />
+                                <p:inputText id="cep" value="#{clienteBean.cliente.cep}"
+                                    styleClass="ui-inputfield-corporativo" />
+                            </div>
+                            <div class="grid-item">
+                                <p:outputLabel for="ativo" value="Ativo" />
+                                <p:selectBooleanCheckbox id="ativo" value="#{clienteBean.cliente.ativo}"
+                                    style="margin-top: 0.5em;" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dialog-footer-corporativo">
+                        <p:commandButton value="Cancelar" icon="pi pi-times"
+                            onclick="PF('manageClienteDialog').hide(); return false;"
+                            styleClass="ui-button-secondary ui-button-outlined"
+                            style="min-width: 110px; padding: 0.75em 1.5em; border-radius: 8px; border: 2px solid #64748b; color: #64748b; background: white; font-weight: 500; transition: all 0.2s ease;"
+                            immediate="true" />
+                        <p:commandButton
+                            value="#{clienteBean.cliente != null and clienteBean.cliente.id != null ? 'Atualizar' : 'Cadastrar'}"
+                            icon="pi pi-check" actionListener="#{clienteBean.salvarCliente()}"
+                            update=":clienteListForm:dt-clientes :clienteListForm:messages"
+                            styleClass="ui-button-success" process="@form"
+                            style="min-width: 110px; padding: 0.75em 1.5em; border-radius: 8px; background: linear-gradient(135deg, #1976d2, #1565c0); border: none; color: white; font-weight: 600; box-shadow: 0 4px 12px rgba(25,118,210,0.3); transition: all 0.2s ease;"
+                            oncomplete="if (!args.validationFailed) PF('manageClienteDialog').hide();" />
+                    </div>
+                </p:panel>
+                <style>
+                    .dialog-grid-corporativo-cliente {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr 1fr;
+                        gap: 1.2em 1.5em;
+                        margin-bottom: 1em;
+                        margin-top: 0.8em;
+                        align-items: end;
+                    }
+
+                    .dialog-grid-corporativo-cliente .grid-item {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.4em;
+                    }
+
+                    .dialog-grid-corporativo-cliente .ui-outputlabel {
+                        font-weight: 600;
+                        color: #37474f;
+                        font-size: 0.95em;
+                        margin-bottom: 0.3em;
+                    }
+
+                    .ui-inputfield-corporativo {
+                        width: 100%;
+                        border-radius: 8px;
+                        border: 1px solid #cfd8dc;
+                        background: #fff;
+                        padding: 0.65em 0.8em;
+                        font-size: 0.95em;
+                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+                        transition: all 0.2s ease;
+                        min-height: 2.5em;
+                        box-sizing: border-box;
+                    }
+
+                    .ui-inputfield-corporativo:focus {
+                        border-color: #1976d2;
+                        outline: none;
+                        box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+                        transform: translateY(-1px);
+                    }
+
+                    .ui-selectonemenu.ui-inputfield-corporativo {
+                        padding: 0;
+                    }
+
+                    .ui-selectonemenu.ui-inputfield-corporativo .ui-selectonemenu-label {
+                        padding: 0.65em 0.8em;
+                        border: none;
+                        background: transparent;
+                    }
+
+                    .ui-panel-corporativo {
+                        border: none;
+                    }
+
+                    .ui-dialog .ui-dialog-content {
+                        padding: 0;
+                    }
+
+                    /* Calendar field fixes */
+                    .ui-calendar.ui-inputfield-corporativo {
+                        border: none;
+                        border-radius: 8px;
+                        background: #fff;
+                        padding: 0;
+                        box-shadow: none;
+                    }
+
+                    .ui-calendar.ui-inputfield-corporativo .ui-inputtext {
+                        border: none;
+                        box-shadow: none;
+                        padding: 0.65em 0.8em;
+                        border-radius: 8px 0 0 8px;
+                    }
+
+                    .ui-calendar.ui-inputfield-corporativo .ui-datepicker-trigger {
+                        border: none;
+                        background: #f8f9fa;
+                        border-radius: 0 8px 8px 0;
+                        color: #1976d2;
+                    }
+
+                    .ui-calendar.ui-inputfield-corporativo:focus-within {
+                        border: none;
+                        box-shadow: none;
+                    }
+
+                    @media (max-width: 900px) {
+                        .dialog-grid-corporativo-cliente {
+                            grid-template-columns: 1fr 1fr;
+                        }
+                    }
+
+                    @media (max-width: 600px) {
+                        .dialog-grid-corporativo-cliente {
+                            grid-template-columns: 1fr;
+                        }
+                    }
+
+                    /* Hover effects for buttons */
+                    .ui-button-secondary.ui-button-outlined:hover {
+                        background: #64748b !important;
+                        color: white !important;
+                        transform: translateY(-1px);
+                        box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3) !important;
+                    }
+
+                    .ui-button-success:hover {
+                        transform: translateY(-1px);
+                        box-shadow: 0 6px 16px rgba(25, 118, 210, 0.4) !important;
+                    }
+                </style>
+            </p:dialog>
+        </h:form>
+    </ui:define>
+</ui:composition>

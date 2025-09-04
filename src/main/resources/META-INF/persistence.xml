@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.2"
+             xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
+    <persistence-unit name="processosPU" transaction-type="JTA">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <jta-data-source>java:jboss/datasources/ProcessosDS</jta-data-source>
+
+        <!-- Classes de Entidade -->
+        <class>com.suaempresa.processos.model.Usuario</class>
+        <class>com.suaempresa.processos.model.TipoLicenciamento</class>
+        <class>com.suaempresa.processos.model.Licenciamento</class>
+        <class>com.suaempresa.processos.model.TipoProcesso</class>
+        <class>com.suaempresa.processos.model.Processo</class>
+        <class>com.suaempresa.processos.model.EtapaDisponivel</class>
+        <class>com.suaempresa.processos.model.EtapaProcesso</class>
+        <class>com.suaempresa.processos.model.ItemDisponivel</class>
+        <class>com.suaempresa.processos.model.ItemEtapa</class>
+        <class>com.suaempresa.processos.model.TipoProcessoEtapasSugeridas</class>
+
+        <properties>
+            <!-- Configurações do Hibernate -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
+            <property name="hibernate.hbm2ddl.auto" value="update"/> <!-- create, create-drop, update, validate, none -->
+            <!-- <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/> -->
+
+            <!-- Configurações de Conexão (para uso em ambiente de desenvolvimento ou testes, JTA é preferível em produção) -->
+            <!-- Para WildFly/JBoss, configurar o DataSource no servidor e referenciar aqui -->
+            <!-- <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/processos_db"/>
+            <property name="jakarta.persistence.jdbc.user" value="postgres"/>
+            <property name="jakarta.persistence.jdbc.password" value="postgres"/> -->
+
+            <!-- JTA DataSource (para servidores de aplicação como WildFly, GlassFish, TomEE) -->
+            <property name="jakarta.persistence.jtaDataSource" value="java:jboss/datasources/ProcessosDS"/>
+        </properties>
+    </persistence-unit>
+</persistence>

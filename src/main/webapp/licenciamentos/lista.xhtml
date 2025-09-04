@@ -1,0 +1,491 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:p="http://primefaces.org/ui" xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:f="http://xmlns.jcp.org/jsf/core" template="/WEB-INF/template.xhtml">
+
+    <ui:define name="content">
+        <div class="table-container">
+            <h:form id="licenciamentoListForm">
+                <p:growl id="messages" closable="true" />
+                <div class="table-header">
+                    <h2 class="table-title">
+                        <i class="pi pi-id-card" style="margin-right: .5rem;"></i>
+                        Gestão de Licenciamentos
+                    </h2>
+                    <div class="table-actions">
+                        <p:commandButton value="Novo Licenciamento" icon="pi pi-plus"
+                            actionListener="#{licenciamentoBean.novoLicenciamento()}"
+                            update=":licenciamentoDialogForm:manageLicenciamentoDialog"
+                            oncomplete="PF('manageLicenciamentoDialog').show()" 
+                            styleClass="ui-button-success ui-corporativo-btn" />
+                    </div>
+                </div>
+
+
+                <div class="card-body">
+
+                    <p:dataTable id="dt-licenciamentos" widgetVar="dtLicenciamentos" var="lic"
+                        value="#{licenciamentoBean.licenciamentos}"
+                        globalFilterFunction="#{licenciamentoBean.globalFilterFunction}"
+                        reflow="true" styleClass="products-table"
+                        paginator="true" rows="10" paginatorPosition="bottom"
+                        rowKey="#{lic.id}"
+                        emptyMessage="Nenhum licenciamento encontrado">
+                        <f:facet name="header">
+							<div style="display: flex; justify-content: space-between; align-items: center;">
+								<h:outputText value="Lista de Licenciamentos" style="font-weight: 600; color: #37474f;" />
+								<div style="display: flex; align-items: center; gap: 0.5em;">
+									<h:outputText value="Buscar: " style="font-weight: 600; color: #37474f;" />
+									<p:inputText id="globalFilter" onkeyup="PF('dtLicenciamentos').filter()"
+										placeholder="Digite para buscar..." style="width:200px" />
+								</div>
+							</div>
+						</f:facet>
+                        <p:column headerText="ID" sortBy="id" width="50px">
+                            <h:outputText value="#{lic.id}" />
+                        </p:column>
+                        <p:column headerText="Tipo" sortBy="tipo.nome" width="120px">
+                            <h:outputText value="#{lic.tipo.nome}" />
+                        </p:column>
+                        <p:column headerText="Cliente" sortBy="cliente.razaoSocial" width="180px">
+                            <h:outputText value="#{lic.cliente.razaoSocial}" />
+                        </p:column>
+                        <p:column headerText="Vencimento" sortBy="dataVencimento" width="130px">
+                            <h:panelGroup rendered="#{lic.dataVencimento != null}">
+                                <h:outputText value="#{lic.dataVencimento}" converter="#{localDateConverter}" />
+                                <br />
+                                <p:tag severity="danger" value="VENCIDO" icon="pi pi-times" rendered="#{lic.alertaVencimento == 'VENCIDO'}" />
+                                <p:tag severity="warning" value="PRÓXIMO" icon="pi pi-exclamation-triangle" rendered="#{lic.alertaVencimento == 'PRÓXIMO'}" />
+                            </h:panelGroup>
+                            <h:outputText value="N/A" rendered="#{lic.dataVencimento == null}" styleClass="text-muted" />
+                        </p:column>
+                        <p:column headerText="Ativo" width="80px">
+                            <p:tag value="#{lic.ativo ? 'Sim' : 'Não'}"
+                                   severity="#{lic.ativo ? 'success' : 'danger'}"
+                                   icon="#{lic.ativo ? 'pi pi-check' : 'pi pi-times'}"
+                                   styleClass="tag-status-licenciamento" />
+                        </p:column>
+                        <p:column headerText="Ações" style="width:160px; text-align:center;">
+                            <span style="display: flex; justify-content: center; gap: 0.5rem;">
+                                <p:commandButton icon="pi pi-list" title="Ver Processos" 
+                                    actionListener="#{licenciamentoBean.carregarProcessosLicenciamento()}"
+                                    update=":processosLicenciamentoDialogForm"
+                                    oncomplete="PF('processosLicenciamentoDialog').show()"
+                                    styleClass="ui-button-rounded ui-button-info ui-button-sm">
+                                    <f:setPropertyActionListener value="#{lic}" target="#{licenciamentoBean.licenciamento}" />
+                                </p:commandButton>
+                                <p:commandButton icon="pi pi-pencil" title="Editar" update=":licenciamentoDialogForm:manageLicenciamentoDialog" process="@this"
+                                    action="#{licenciamentoBean.carregarLicenciamento()}"
+                                    oncomplete="PF('manageLicenciamentoDialog').show()"
+                                    styleClass="ui-button-rounded ui-button-warning ui-button-sm" >
+                                    <f:setPropertyActionListener value="#{lic}" target="#{licenciamentoBean.licenciamento}" />
+                                </p:commandButton>
+                                <p:commandButton icon="pi pi-trash" title="Excluir" styleClass="ui-button-rounded ui-button-danger ui-button-sm"
+                                    actionListener="#{licenciamentoBean.deletarLicenciamento(lic)}"
+                                    update=":licenciamentoListForm:dt-licenciamentos :licenciamentoListForm:messages"
+                                    process="@this"
+                                    onclick="return confirm('Deseja realmente excluir este item?')" />
+                            </span>
+                        </p:column>
+                        
+                        <p:rowExpansion>
+                            <div style="padding:1rem 2rem;">
+                                <h3 style="margin:0 0 0.5rem 0; color:#1976d2;">Processos Associados</h3>
+                                <h:panelGroup rendered="#{not empty lic.processos}">
+                                    <p:dataTable var="proc" value="#{lic.processos}" styleClass="nested-table">
+                                        <p:column headerText="ID">
+                                            <h:outputText value="#{proc.id}" />
+                                        </p:column>
+                                        <p:column headerText="Título">
+                                            <h:outputText value="#{proc.titulo}" />
+                                        </p:column>
+                                        <p:column headerText="Status">
+                                            <p:tag value="#{proc.status}" 
+                                                styleClass="#{
+                                                    proc.status == 'CONCLUIDO' ? 'status-concluido' :
+                                                    proc.status == 'ABERTO' ? 'status-aberto' :
+                                                    proc.status == 'EM_ANDAMENTO' ? 'status-andamento' :
+                                                    proc.status == 'PARADO' ? 'status-parado' :
+                                                    proc.status == 'CANCELADO' ? 'status-cancelado' :
+                                                    ''
+                                                }" />
+                                        </p:column>
+                                        <p:column headerText="Data Criação">
+                                            <h:outputText value="#{proc.dataCriacao}" rendered="#{proc.dataCriacao != null}">
+                                                <f:converter converterId="localDateTimeConverter" />
+                                            </h:outputText>
+                                        </p:column>
+                                        <p:column headerText="Ações">
+                                            <p:commandButton icon="pi pi-search" title="Ver Detalhes"
+                                                action="/processos/detalhe?faces-redirect=true"
+                                                styleClass="ui-button-rounded ui-button-info ui-button-sm">
+                                                <f:param name="processoId" value="#{proc.id}" />
+                                            </p:commandButton>
+                                        </p:column>
+                                    </p:dataTable>
+                                </h:panelGroup>
+                                <h:outputText value="Nenhum processo associado." rendered="#{empty lic.processos}" style="color:#888;" />
+                            </div>
+                        </p:rowExpansion>
+                    </p:dataTable>
+                </div>
+
+            </h:form>
+
+            <!-- Dialog de Cadastro de Licenciamento -->
+            <h:form id="licenciamentoDialogForm">
+                <p:dialog id="manageLicenciamentoDialog" header=""
+                    showEffect="fade" modal="true" widgetVar="manageLicenciamentoDialog" responsive="true" closeOnEscape="true"
+                    width="980" 
+                    position="center"
+                    style="border-radius:12px; max-height: 90vh;">
+                    <p:panel styleClass="ui-panel ui-panel-corporativo" style="background: #fafbfc; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 0;">
+                        <f:facet name="header">
+                            <div style="display:flex; align-items:center; gap:0.8em; padding: 1.5em 1.5em 0.5em 1.5em;">
+                                <i class="pi pi-id-card" style="font-size:1.6em; color:#1976d2;"></i>
+                                <span style="font-size:1.4em; font-weight:600; color:#263238; letter-spacing:0.3px;">Cadastro de Licenciamento</span>
+                            </div>
+                        </f:facet>
+                        <div class="form-container" style="padding: 0 1.5em 1em 1.5em;">
+                            <div class="dialog-grid-corporativo">
+                                <!-- Linha 1: Informações básicas -->
+                                <div class="grid-item">
+                                    <p:outputLabel for="cliente" value="Cliente " />
+                                    <p:selectOneMenu id="cliente" value="#{licenciamentoBean.clienteId}" required="true" 
+                                        requiredMessage="Cliente é obrigatório" styleClass="ui-inputfield-corporativo" 
+                                        filter="true" filterMatchMode="contains" filterPlaceholder="Filtrar clientes...">
+                                        <f:selectItem itemLabel="Selecione o cliente" itemValue="" />
+                                        <f:selectItems value="#{licenciamentoBean.clientes}" var="cli"
+                                            itemLabel="#{cli.razaoSocial} - #{cli.documento}" itemValue="#{cli.id}" />
+                                    </p:selectOneMenu>
+                                </div>
+                                <div class="grid-item">
+                                    <p:outputLabel for="tipoLicenciamento" value="Tipo de Licenciamento " />
+                                    <p:selectOneMenu id="tipoLicenciamento"
+                                        value="#{licenciamentoBean.licenciamento.tipo}"
+                                        converter="#{tipoLicenciamentoConverter}" required="true"
+                                        requiredMessage="Tipo de Licenciamento é obrigatório"
+                                        styleClass="ui-inputfield-corporativo"
+                                        filter="true" filterMatchMode="contains" filterPlaceholder="Filtrar tipos...">
+                                        <f:selectItem itemLabel="Selecione o tipo" itemValue="#{null}" />
+                                        <f:selectItems value="#{licenciamentoBean.tiposLicenciamento}" var="tl"
+                                            itemLabel="#{tl.nome}" itemValue="#{tl}" />
+                                    </p:selectOneMenu>
+                                </div>
+                                
+                                <!-- Linha 2: Datas -->
+                                <div class="grid-item">
+                                    <p:outputLabel for="dataEmissao" value="Data de Emissão " />
+                                    <p:calendar id="dataEmissao" value="#{licenciamentoBean.licenciamento.dataEmissao}"
+                                        pattern="dd/MM/yyyy" mask="true" required="true"
+                                        requiredMessage="Data de Emissão é obrigatória"
+                                        converter="#{localDateConverter}" showOn="button" navigator="true"
+                                        monthNavigator="true" yearNavigator="true" locale="pt_BR"
+                                        showButtonPanel="true" styleClass="ui-inputfield-corporativo" />
+                                </div>
+                                <div class="grid-item">
+                                    <p:outputLabel for="dataVencimento" value="Data de Vencimento " />
+                                    <p:calendar id="dataVencimento"
+                                        value="#{licenciamentoBean.licenciamento.dataVencimento}" pattern="dd/MM/yyyy"
+                                        mask="true" required="true" requiredMessage="Data de Vencimento é obrigatória"
+                                        converter="#{localDateConverter}" showOn="button" navigator="true"
+                                        monthNavigator="true" yearNavigator="true" locale="pt_BR"
+                                        showButtonPanel="true" styleClass="ui-inputfield-corporativo" />
+                                </div>
+                                
+                                <!-- Linha 3: Valores e configurações -->
+                                <div class="grid-item">
+                                    <p:outputLabel for="taxaValor" value="Taxa/Valor (R$)" />
+                                    <p:inputNumber id="taxaValor" value="#{licenciamentoBean.licenciamento.taxaValor}"
+                                        symbol="R$" symbolPosition="p" decimalSeparator="," thousandSeparator="."
+                                        decimalPlaces="2" styleClass="ui-inputfield-corporativo" 
+                                        placeholder="Ex: 1.500,00" />
+                                </div>
+                                <div class="grid-item">
+                                    <p:outputLabel for="avisoPrevioDias" value="Aviso Prévio (dias)" />
+                                    <p:inputText id="avisoPrevioDias"
+                                        value="#{licenciamentoBean.licenciamento.avisoPrevioDias}"
+                                        converter="javax.faces.Integer" styleClass="ui-inputfield-corporativo" 
+                                        placeholder="Ex: 30" />
+                                </div>
+                                
+                                <!-- Linha 4: Status -->
+                                <div class="grid-item-checkbox">
+                                    <div class="checkbox-container">
+                                        <p:selectBooleanCheckbox id="ativo" value="#{licenciamentoBean.licenciamento.ativo}" />
+                                        <p:outputLabel for="ativo" value="Licenciamento Ativo" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dialog-footer-corporativo">
+                            <p:commandButton value="Cancelar" icon="pi pi-times"
+                                onclick="PF('manageLicenciamentoDialog').hide(); return false;"
+                                styleClass="ui-button-secondary ui-button-outlined"
+                                style="min-width: 110px; padding: 0.75em 1.5em; border-radius: 8px; border: 2px solid #64748b; color: #64748b; background: white; font-weight: 500; transition: all 0.2s ease;"
+                                immediate="true" />
+                            <p:commandButton value="#{licenciamentoBean.licenciamento != null and licenciamentoBean.licenciamento.id != null ? 'Atualizar' : 'Cadastrar'}" icon="pi pi-check"
+                                actionListener="#{licenciamentoBean.salvarLicenciamento()}"
+                                update=":licenciamentoListForm:dt-licenciamentos :licenciamentoListForm:messages"
+                                styleClass="ui-button-success"
+                                style="min-width: 110px; padding: 0.75em 1.5em; border-radius: 8px; background: linear-gradient(135deg, #1976d2, #1565c0); border: none; color: white; font-weight: 600; box-shadow: 0 4px 12px rgba(25,118,210,0.3); transition: all 0.2s ease;"
+                                process="@form"
+                                oncomplete="if (!args.validationFailed) PF('manageLicenciamentoDialog').hide();" />
+                        </div>
+                    </p:panel>
+                </p:dialog>
+            </h:form>
+
+            <!-- Dialog para visualizar processos do licenciamento -->
+            <h:form id="processosLicenciamentoDialogForm">
+                <p:dialog id="processosLicenciamentoDialog" header="" 
+                          showEffect="fade" modal="true" widgetVar="processosLicenciamentoDialog" 
+                          responsive="true" closeOnEscape="true"
+                          width="900" 
+                          position="center"
+                          style="border-radius:12px; max-height: 90vh;">
+                    <p:panel styleClass="ui-panel ui-panel-corporativo" 
+                             style="background: #fafbfc; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 0;">
+                        <f:facet name="header">
+                            <div style="display:flex; align-items:center; gap:0.8em; padding: 1.5em 1.5em 0.5em 1.5em;">
+                                <i class="pi pi-list" style="font-size:1.6em; color:#1976d2;"></i>
+                                <span style="font-size:1.4em; font-weight:600; color:#263238; letter-spacing:0.3px;">
+                                    Processos Vinculados
+                                </span>
+                            </div>
+                        </f:facet>
+                        
+                        <div class="form-container" style="padding: 1.5em;">
+                            <!-- Tabela simplificada de processos -->
+                            <h:panelGroup rendered="#{not empty licenciamentoBean.licenciamento.processos}">
+                                <p:dataTable id="dt-processos-simples" var="proc" 
+                                             value="#{licenciamentoBean.licenciamento.processos}" 
+                                             styleClass="products-table"
+                                             emptyMessage="Nenhum processo encontrado">
+                                             
+                                    <p:column headerText="ID" style="width: 60px; text-align: center;">
+                                        <h:outputText value="#{proc.id}" style="font-weight: 600; color: #1976d2;" />
+                                    </p:column>
+                                    
+                                    <p:column headerText="Título">
+                                        <h:outputText value="#{proc.titulo}" style="font-weight: 500;" />
+                                    </p:column>
+                                    
+                                    <p:column headerText="Status" style="width: 120px; text-align: center;">
+                                        <p:tag value="#{proc.status}" 
+                                               styleClass="#{
+                                                   proc.status == 'CONCLUIDO' ? 'status-concluido' :
+                                                   proc.status == 'ABERTO' ? 'status-aberto' :
+                                                   proc.status == 'EM_ANDAMENTO' ? 'status-andamento' :
+                                                   proc.status == 'PARADO' ? 'status-parado' :
+                                                   proc.status == 'CANCELADO' ? 'status-cancelado' : ''
+                                               }" />
+                                    </p:column>
+                                    
+                                    <p:column headerText="Data Criação" style="width: 140px; text-align: center;">
+                                        <h:outputText value="#{proc.dataCriacao}" rendered="#{proc.dataCriacao != null}">
+                                            <f:converter converterId="localDateTimeConverter" />
+                                        </h:outputText>
+                                        <span style="color: #888; font-style: italic;" rendered="#{proc.dataCriacao == null}">N/A</span>
+                                    </p:column>
+                                    
+                                    <p:column headerText="Ações" style="width: 100px; text-align: center;">
+                                        <p:commandButton icon="pi pi-eye" title="Ver Detalhes"
+                                                          action="#{licenciamentoBean.visualizarProcesso(proc)}"
+                                                         styleClass="ui-button-rounded ui-button-info ui-button-sm">
+                                            <f:param name="processoId" value="#{proc.id}" />
+                                        </p:commandButton>
+                                    </p:column>
+                                </p:dataTable>
+                            </h:panelGroup>
+                            
+                            <!-- Mensagem quando não há processos -->
+                            <h:panelGroup rendered="#{empty licenciamentoBean.licenciamento.processos}">
+                                <div style="text-align: center; padding: 2.5em 2em; background: linear-gradient(135deg, #f8f9fa, #e8eaf6); border-radius: 8px; border: 2px dashed #cfd8dc;">
+                                    <i class="pi pi-info-circle" style="font-size: 2.5em; color: #90a4ae; margin-bottom: 0.8em;"></i>
+                                    <p style="font-size: 1.1em; color: #546e7a; margin: 0 0 1.2em 0; font-weight: 500;">
+                                        Nenhum processo vinculado a este licenciamento
+                                    </p>
+                                    <p:commandButton value="Criar Processo" icon="pi pi-plus"
+                                                     action="#{licenciamentoBean.criarNovoProcessoParaLicenciamento(licenciamentoBean.licenciamento)}"
+                                                     styleClass="ui-button-success ui-corporativo-btn" />
+                                </div>
+                            </h:panelGroup>
+                        </div>
+                        
+                        <!-- Footer simples -->
+                        <div class="dialog-footer-corporativo">
+                            <p:commandButton value="Fechar" icon="pi pi-times"
+                                             onclick="PF('processosLicenciamentoDialog').hide(); return false;"
+                                             styleClass="ui-button-secondary ui-button-outlined"
+                                             style="min-width: 110px; padding: 0.75em 1.5em; border-radius: 8px; border: 2px solid #64748b; color: #64748b; background: white; font-weight: 500; transition: all 0.2s ease;"
+                                             immediate="true" />
+                        </div>
+                    </p:panel>
+                </p:dialog>
+            </h:form>
+        </div>
+        
+        <style>
+            /* Grid layout profissional para formulário */
+            .dialog-grid-corporativo {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1.5em 1.8em;
+                margin-bottom: 1em;
+                margin-top: 0.8em;
+                align-items: start;
+            }
+            
+            .dialog-grid-corporativo .grid-item {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5em;
+                position: relative;
+                z-index: 1;
+            }
+            
+            .dialog-grid-corporativo .grid-item-checkbox {
+                grid-column: 1 / 3;
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
+                margin-top: 1em;
+                padding-top: 1em;
+                border-top: 1px solid #e1e5e9;
+            }
+            
+            .checkbox-container {
+                display: flex;
+                align-items: center;
+                gap: 0.8em;
+                background: #f8f9fa;
+                padding: 0.8em 1.2em;
+                border-radius: 8px;
+                border: 1px solid #e1e5e9;
+            }
+            
+            .dialog-grid-corporativo .ui-outputlabel {
+                font-weight: 600;
+                color: #37474f;
+                font-size: 0.95em;
+                margin-bottom: 0.3em;
+            }
+            
+            .ui-inputfield-corporativo {
+                width: 100%;
+                border-radius: 8px;
+                border: 1px solid #cfd8dc;
+                background: #fff;
+                padding: 0.65em 0.8em;
+                font-size: 0.95em;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+                transition: all 0.2s ease;
+                min-height: 2.5em;
+                box-sizing: border-box;
+            }
+            
+            .ui-inputfield-corporativo:focus {
+                border-color: #1976d2;
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+                transform: translateY(-1px);
+            }
+            
+            .ui-selectonemenu.ui-inputfield-corporativo {
+                padding: 0;
+                height: auto;
+                min-height: 2.5em;
+                display: block;
+                position: relative;
+                z-index: 1;
+            }
+            
+            .ui-selectonemenu.ui-inputfield-corporativo .ui-selectonemenu-label {
+                padding: 0.65em 0.8em;
+                border: none;
+                background: transparent;
+                height: auto;
+                line-height: 1.4;
+            }
+            
+            .ui-selectonemenu.ui-inputfield-corporativo .ui-selectonemenu-panel {
+                z-index: 9999 !important;
+            }
+            
+            .ui-calendar.ui-inputfield-corporativo {
+                padding: 0;
+                width: 100% !important;
+                display: block !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            
+            .ui-calendar.ui-inputfield-corporativo .ui-inputtext {
+                border: none;
+                padding: 0.65em 0.8em;
+                border-radius: 8px 0 0 8px;
+                width: calc(100% - 42px) !important;
+                box-shadow: none;
+            }
+            
+            .ui-calendar.ui-inputfield-corporativo .ui-datepicker-trigger {
+                border: none;
+                background: #f8f9fa;
+                border-radius: 0 8px 8px 0;
+                color: #1976d2;
+                border-left: 1px solid #cfd8dc;
+            }
+            
+            .ui-inputnumber.ui-inputfield-corporativo {
+                padding: 0;
+                height: auto;
+                min-height: 2.5em;
+                display: block;
+            }
+            
+            .ui-inputnumber.ui-inputfield-corporativo .ui-inputtext {
+                border: none;
+                padding: 0.65em 0.8em;
+                background: transparent;
+                height: auto;
+                line-height: 1.4;
+                box-sizing: border-box;
+            }
+            
+            .ui-inputnumber.ui-inputfield-corporativo .ui-inputnumber-buttons-stacked .ui-spinner {
+                height: auto;
+            }
+           
+            .ui-panel-corporativo {
+                border: none;
+            }
+            
+            .ui-dialog .ui-dialog-content {
+                padding: 0;
+            }
+            
+            @media (max-width: 768px) {
+                .dialog-grid-corporativo {
+                    grid-template-columns: 1fr;
+                    gap: 1em;
+                }
+                .dialog-grid-corporativo .grid-item-checkbox {
+                    grid-column: 1;
+                }
+            }
+            
+            /* Hover effects for buttons */
+            .ui-button-secondary.ui-button-outlined:hover {
+                background: #64748b !important;
+                color: white !important;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(100,116,139,0.3) !important;
+            }
+            
+            .ui-button-success:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 6px 16px rgba(25,118,210,0.4) !important;
+            }
+        </style>
+    </ui:define>
+</ui:composition>

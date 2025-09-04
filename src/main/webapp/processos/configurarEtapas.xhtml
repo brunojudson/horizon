@@ -1,0 +1,58 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:o="http://omnifaces.org/ui"
+    template="/WEB-INF/template.xhtml">
+
+    <f:metadata>
+        <f:viewParam name="processoId" value="#{configurarEtapasBean.processoId}"/>
+    </f:metadata>
+    <ui:define name="content">
+        <h:form id="formConfigEtapas">
+        <h2>Configuração de Etapas do Processo</h2>
+        <p:messages showDetail="true" closable="true"/>
+        <h:panelGrid columns="2" cellpadding="5">
+            <h:outputLabel value="ID do processo:" />
+            <h:outputText value="#{param.processoId}" />
+        </h:panelGrid>
+        <p:separator/>
+            <h3>Processo: <h:outputText value="#{configurarEtapasBean.processo.titulo}" /></h3>
+            <p:outputPanel>
+                <p:dataTable id="tabelaEtapas"
+                    value="#{configurarEtapasBean.etapasDisponiveis}"
+                    var="etapa"
+                    selection="#{configurarEtapasBean.etapasSelecionadas}"
+                    rowKey="#{etapa.id}"
+                    paginator="false"
+                    rows="10"
+                    style="margin-bottom:1em">
+                    <p:column selectionMode="multiple" style="width:3%" />
+                    <p:column headerText="Título">
+                        <h:outputText value="#{etapa.titulo}" />
+                    </p:column>
+                    <p:column headerText="Descrição">
+                        <h:outputText value="#{etapa.descricao}" />
+                    </p:column>
+                </p:dataTable>
+                <div style="display: flex; gap: 1.2rem; margin-top: 1.5rem;">
+                    <p:button value="Voltar ao Detalhe" icon="pi pi-arrow-left"
+                        outcome="/processos/detalhe"
+                        styleClass="ui-button-secondary"
+                        style="min-width: 170px; font-size: 1.08rem;"
+                    >
+                        <f:param name="processoId" value="#{configurarEtapasBean.processoId}" />
+                    </p:button>
+                    <p:commandButton value="Salvar Etapas" icon="pi pi-save"
+                        action="#{configurarEtapasBean.salvarEtapasERedirecionar}"
+                        ajax="false"
+                        styleClass="ui-button-success"/>
+                </div>
+            </p:outputPanel>
+            <p:outputPanel rendered="#{empty configurarEtapasBean.etapasDisponiveis}">
+                <h:outputText value="Nenhuma etapa disponível cadastrada." style="color: #888;"/>
+            </p:outputPanel>
+        </h:form>
+    </ui:define>
+</ui:composition>
