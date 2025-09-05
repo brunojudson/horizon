@@ -234,6 +234,7 @@
                                     <h4>Nenhuma etapa configurada</h4>
                                     <p>Este processo ainda não possui etapas definidas.</p>
                                     <p:commandButton value="Configurar Etapas" action="#{processoBean.configurarEtapas}"
+                                        disabled="#{processoBean.processo.status eq 'CANCELADO' || processoBean.processo.status eq 'CONCLUIDO'}"
                                         icon="pi pi-cog" styleClass="ui-button-info ui-button-raised ui-button-lg"
                                         style="font-size: 1.13rem; padding: 0.85rem 2.2rem; border-radius: 8px; font-weight: 700; box-shadow: 0 2px 8px 0 rgba(25,118,210,0.10);" />
                                 </div>
@@ -257,6 +258,7 @@
                                 </p:button>
                                 <p:commandButton value="Finalizar Processo" icon="pi pi-check"
                                     styleClass="ui-button-success ui-corporativo-btn"
+                                    disabled="#{processoBean.processo.status eq 'CANCELADO'}"
                                     rendered="#{processoBean.processo != null and processoBean.processo.status != 'CONCLUIDO'}"
                                     actionListener="#{processoBean.finalizarProcesso}" update="@form detalheMessages"
                                     onclick="return confirm('Deseja realmente finalizar este processo?')" />

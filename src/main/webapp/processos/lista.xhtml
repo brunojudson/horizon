@@ -22,7 +22,7 @@
                         
                         <p:commandButton value="Novo Processo" icon="pi pi-plus"
                             actionListener="#{processoBean.novoProcesso()}"
-                            update="manageProcessoDialog :processoDetailForm"
+                            update=":processoDetailForm:manageProcessoDialog :processoDetailForm"
                             oncomplete="PF('manageProcessoDialog').show()" styleClass="ui-button-success ui-corporativo-btn" />
                         <p:commandButton value="Atualizar Lista" icon="pi pi-refresh"
                             actionListener="#{processoBean.carregarProcessos()}"
@@ -104,7 +104,7 @@
                             <div style="display: flex; gap: 0.5rem;">
                                 <p:commandButton icon="pi pi-pencil" title="Editar"
                                     actionListener="#{processoBean.carregarProcesso(proc)}"
-                                    oncomplete="PF('manageProcessoDialog').show()" update=":processoDetailForm"
+                                    oncomplete="PF('manageProcessoDialog').show()" update=":processoDetailForm:manageProcessoDialog :processoDetailForm"
                                     styleClass="ui-button-rounded ui-button-warning ui-button-sm" />
                                 <p:commandButton icon="pi pi-trash" title="Excluir"
                                     actionListener="#{processoBean.deletarProcesso(proc)}"
@@ -141,6 +141,7 @@
                 </h:form>
 
                 <!-- Diálogo de detalhes do processo -->
+                <h:form id="processoDetailForm">
                 <p:dialog header="" dynamic="true"
                     showEffect="fade" modal="true" widgetVar="manageProcessoDialog" id="manageProcessoDialog"
                     responsive="true" closeOnEscape="true" 
@@ -148,24 +149,47 @@
                     position="center"
                     style="border-radius:12px; max-height: 90vh;">
                     <p:panel styleClass="ui-panel ui-panel-corporativo" style="background: #fafbfc; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 0;">
-                        <f:facet name="header">
-                            <div style="display:flex; align-items:center; gap:0.8em; padding: 1.5em 1.5em 0.5em 1.5em;">
+                    <f:facet name="header">
+                            <div style="display:flex; align-items:center; gap:0.8em; padding: 0.2em 1.5em 0.5em 1.5em;">    
                                 <i class="pi pi-sitemap" style="font-size:1.6em; color:#1976d2;"></i>
                                 <span style="font-size:1.4em; font-weight:600; color:#263238; letter-spacing:0.3px;">Cadastro de Processo</span>
                             </div>
+                            <!-- Mensagens dinâmicas por status -->
+                            <h:panelGroup id="msgGroupConcluido" rendered="#{processoBean.processo.status eq 'CONCLUIDO'}">
+                                <div style="color:#c62828; font-size:1em; margin-top:0.3em; line-height:1.6; font-weight:500; padding: 0 1.5em;">
+                                    <i class="pi pi-info-circle" style="margin-right:0.5em; font-size:1.2em; vertical-align:middle;"></i>
+                                    <span>Este processo está <b>concluído</b> e não pode ser alterado diretamente.<br/>
+                                    Para realizar alterações, acesse a <b>página de detalhe</b> e reabra o processo.<br/>
+                                    <span style="color:#ad1457; font-weight:600;">A reabertura e alteração serão registradas no log do sistema.</span></span>
+                                </div>
+                            </h:panelGroup>
+                            <h:panelGroup id="msgGroupParado" rendered="#{processoBean.processo.status eq 'PARADO'}">
+                                <div style="color:#fbc02d; font-size:1em; margin-top:0.3em; line-height:1.6; font-weight:500; padding: 0 1.5em;">
+                                    <i class="pi pi-pause" style="margin-right:0.5em; font-size:1.2em; vertical-align:middle;"></i>
+                                    <span>Processo parado, alterações podem <b>reativar o fluxo</b>.</span>
+                                </div>
+                            </h:panelGroup>
+                            <h:panelGroup id="msgGroupCancelado" rendered="#{processoBean.processo.status eq 'CANCELADO'}">
+                                <div style="color:#757575; font-size:1em; margin-top:0.3em; line-height:1.6; font-weight:500; padding: 0 1.5em;">
+                                    <i class="pi pi-ban" style="margin-right:0.5em; font-size:1.2em; vertical-align:middle;"></i>
+                                    <span>Processo cancelado, alterações <b>restritas</b>.</span>
+                                </div>
+                            </h:panelGroup>
                         </f:facet>
-                        <h:form id="processoDetailForm">
+                      
                             <div class="form-container" style="padding: 0 1.5em 1em 1.5em;">
                                 <div class="dialog-grid-corporativo">
                                     <div class="grid-item">
                                         <p:outputLabel for="titulo" value="Título " />
                                         <p:inputText id="titulo" value="#{processoBean.processo.titulo}" required="true"
-                                            placeholder="Digite o título do processo" styleClass="ui-inputfield-corporativo" />
+                                            placeholder="Digite o título do processo" styleClass="ui-inputfield-corporativo"
+                                            disabled="#{processoBean.processo.status eq 'CANCELADO'}" />
                                     </div>
                                     <div class="grid-item">
                                         <p:outputLabel for="tipoProcesso" value="Tipo de Processo " />
                                         <p:selectOneMenu id="tipoProcesso" value="#{processoBean.processo.tipoProcesso}"
-                                            converter="#{tipoProcessoConverter}" required="true" styleClass="ui-inputfield-corporativo">
+                                            converter="#{tipoProcessoConverter}" required="true" styleClass="ui-inputfield-corporativo"
+                                            disabled="#{processoBean.processo.status eq 'CANCELADO'}">
                                             <f:selectItem itemLabel="Selecione o tipo" itemValue="#{null}" />
                                             <f:selectItems value="#{processoBean.tiposProcesso}" var="tp"
                                                 itemLabel="#{tp.nome}" itemValue="#{tp}" />
@@ -174,7 +198,8 @@
                                     <div class="grid-item">
                                         <p:outputLabel for="cliente" value="Cliente " />
                                         <p:selectOneMenu id="cliente" value="#{processoBean.clienteId}" required="true" 
-                                            styleClass="ui-inputfield-corporativo" filter="true" filterMatchMode="contains" filterPlaceholder="Filtrar clientes...">
+                                            styleClass="ui-inputfield-corporativo" filter="true" filterMatchMode="contains" filterPlaceholder="Filtrar clientes..."
+                                            disabled="#{processoBean.processo.status eq 'CANCELADO'}">
                                             <f:selectItem itemLabel="Selecione o cliente" itemValue="" noSelectionOption="true" />
                                             <f:selectItems value="#{processoBean.clientes}" var="cli"
                                                 itemLabel="#{cli.razaoSocial} - #{cli.documento}" itemValue="#{cli.id}" />
@@ -184,7 +209,8 @@
                                         <p:outputLabel for="responsavel" value="Responsável" />
                                         <p:selectOneMenu id="responsavel" value="#{processoBean.processo.responsavel}"
                                             converter="#{usuarioConverter}" styleClass="ui-inputfield-corporativo" 
-                                            filter="true" filterMatchMode="contains" filterPlaceholder="Filtrar responsáveis...">
+                                            filter="true" filterMatchMode="contains" filterPlaceholder="Filtrar responsáveis..."
+                                            disabled="#{processoBean.processo.status eq 'CANCELADO'}">
                                             <f:selectItem itemLabel="Selecione o responsável" itemValue="#{null}" />
                                             <f:selectItems value="#{processoBean.responsaveis}" var="resp"
                                                 itemLabel="#{resp.nome}" itemValue="#{resp}" />
@@ -195,7 +221,8 @@
                                         <p:selectOneMenu id="licenciamentoAssociado" 
                                             value="#{processoBean.licenciamentoIdSelecionado}"
                                             styleClass="ui-inputfield-corporativo" 
-                                            filter="true" filterMatchMode="contains" filterPlaceholder="Filtrar licenciamentos...">
+                                            filter="true" filterMatchMode="contains" filterPlaceholder="Filtrar licenciamentos..."
+                                            disabled="#{processoBean.processo.status eq 'CANCELADO'}">
                                             <f:selectItem itemLabel="Nenhum licenciamento" itemValue="" noSelectionOption="true" />
                                             <f:selectItems value="#{processoBean.licenciamentos}" var="lic"
                                                 itemLabel="#{lic.tipo.nome} - #{lic.cliente.razaoSocial}" itemValue="#{lic.id}" />
@@ -203,7 +230,8 @@
                                     </div>
                                     <div class="grid-item">
                                         <p:outputLabel for="statusProcesso" value="Status" />
-                                        <p:selectOneMenu id="statusProcesso" value="#{processoBean.processo.status}" styleClass="ui-inputfield-corporativo">
+                                        <p:selectOneMenu id="statusProcesso" value="#{processoBean.processo.status}" styleClass="ui-inputfield-corporativo"
+                                            disabled="#{processoBean.processo.status eq 'CANCELADO'}">
                                             <f:selectItems value="#{processoBean.statusProcessos}" var="st"
                                                 itemLabel="#{st}" itemValue="#{st}" />
                                         </p:selectOneMenu>
@@ -215,7 +243,8 @@
                                             mask="true" showOn="button" navigator="true" monthNavigator="true"
                                             yearNavigator="true" locale="pt_BR" showButtonPanel="true" 
                                             styleClass="ui-inputfield-corporativo"
-                                            style="width: 100%; display: block;">
+                                            style="width: 100%; display: block;"
+                                            disabled="#{processoBean.processo.status eq 'CANCELADO'}">
                                             <f:converter converterId="robustLocalDateConverter" />
                                         </p:calendar>
                                     </div>
@@ -223,14 +252,16 @@
                                         <p:outputLabel for="taxaValorTotal" value="Valor Total (R$)" />
                                         <p:inputNumber id="taxaValorTotal" value="#{processoBean.processo.taxaValorTotal}"
                                             symbol="R$" symbolPosition="p" decimalSeparator="," thousandSeparator="."
-                                            decimalPlaces="2" styleClass="ui-inputfield-corporativo" />
+                                            decimalPlaces="2" styleClass="ui-inputfield-corporativo"
+                                            disabled="#{processoBean.processo.status eq 'CANCELADO'}" />
                                     </div>
                                     <div class="grid-item grid-item-full">
                                         <p:outputLabel for="descricao" value="Observações" />
                                         <p:inputTextarea id="descricao" value="#{processoBean.processo.descricao}" rows="3"
                                             placeholder="Digite observações sobre o processo (opcional)" counter="display" maxlength="1000"
                                             counterTemplate="{0} caracteres restantes"
-                                            style="width: 100%; resize: vertical;" styleClass="ui-inputfield-corporativo" />
+                                            style="width: 100%; resize: vertical;" styleClass="ui-inputfield-corporativo"
+                                            disabled="#{false}" />
                                         <h:outputText id="display" class="block" style="font-size: 0.85em; color: #666; margin-top: 0.25em;" />
                                     </div>
                                 </div>
@@ -266,14 +297,15 @@
                                     style="min-width: 110px; padding: 0.75em 1.5em; border-radius: 8px; border: 2px solid #64748b; color: #64748b; background: white; font-weight: 500; transition: all 0.2s ease;"
                                     immediate="true" />
                                 <p:commandButton value="#{processoBean.processo != null and processoBean.processo.id != null ? 'Atualizar' : 'Cadastrar'}" icon="pi pi-check"
-                                    actionListener="#{processoBean.salvarProcesso()}"
-                                    update=":processoListForm:dt-processos :processoListForm:messages"
-                                    styleClass="ui-button-success"
-                                    style="min-width: 110px; padding: 0.75em 1.5em; border-radius: 8px; background: linear-gradient(135deg, #1976d2, #1565c0); border: none; color: white; font-weight: 600; box-shadow: 0 4px 12px rgba(25,118,210,0.3); transition: all 0.2s ease;"
-                                    oncomplete="if(!args.validationFailed) PF('manageProcessoDialog').hide();"
-                                    process="@form" />
+                                        actionListener="#{processoBean.salvarProcesso()}"
+                                        update=":processoListForm:dt-processos :processoListForm:messages"
+                                        styleClass="ui-button-success"
+                                        style="min-width: 110px; padding: 0.75em 1.5em; border-radius: 8px; background: linear-gradient(135deg, #1976d2, #1565c0); border: none; color: white; font-weight: 600; box-shadow: 0 4px 12px rgba(25,118,210,0.3); transition: all 0.2s ease;"
+                                        oncomplete="if(!args.validationFailed) PF('manageProcessoDialog').hide();"
+                                        process="@form"
+                                        disabled="#{processoBean.processo.status eq 'CONCLUIDO'}" />
                             </div>
-                        </h:form>
+                     
                     </p:panel>
                     <style>
                         .dialog-grid-corporativo {
@@ -314,98 +346,29 @@
                             box-sizing: border-box;
                         }
                         
-                        .ui-inputfield-corporativo:focus {
+                        /* Efeito de focus apenas para o campo título */
+                        #titulo.ui-inputfield-corporativo:focus {
                             border-color: #1976d2;
                             outline: none;
                             box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+                            transform: translateY(-1px);
                         }
-                        
-                        .ui-selectonemenu.ui-inputfield-corporativo {
-                            padding: 0;
-                        }
-                        
-                        .ui-selectonemenu.ui-inputfield-corporativo .ui-selectonemenu-label {
-                            padding: 0.65em 0.8em;
-                            border: none;
-                            background: transparent;
-                        }
-                        
-                        .ui-calendar.ui-inputfield-corporativo {
-                            padding: 0;
-                            width: 100% !important;
-                            display: block !important;
-                            border: none !important;
-                            box-shadow: none !important;
-                        }
-                        
-                        .ui-calendar.ui-inputfield-corporativo .ui-inputtext {
-                            border: none;
-                            padding: 0.65em 0.8em;
-                            border-radius: 8px 0 0 8px;
-                            width: calc(100% - 42px) !important;
+                        /* Remover efeito de focus dos demais campos */
+                        .ui-inputfield-corporativo:focus {
+                            border-color: #cfd8dc;
                             box-shadow: none;
+                            outline: none;
+                            transform: none;
                         }
-                        
-                        .ui-inputnumber.ui-inputfield-corporativo .ui-inputtext {
-                            border: none;
-                            padding: 0.65em 0.8em;
-                            background: transparent;
-                        }
-                       
-                        .ui-panel-corporativo {
-                            border: none;
-                        }
-                        
-                        .ui-dialog .ui-dialog-content {
-                            padding: 0;
-                        }
-                        
-                        @media (max-width: 768px) {
-                            .dialog-grid-corporativo {
-                                grid-template-columns: 1fr;
-                                gap: 1em;
-                            }
-                            .dialog-grid-corporativo .grid-item-full {
-                                grid-column: 1;
-                            }
-                        }
-                        
-                        /* Dialog centralizado com tamanho consistente */
-                        /* Removido width fixo para permitir ajuste pelo atributo width do componente */
-                        #manageProcessoDialog .ui-dialog-content {
-                            padding: 0 !important;
-                        }
-                        
-                        /* Hover effects for buttons */
-                        .ui-button-secondary.ui-button-outlined:hover {
-                            background: #64748b !important;
-                            color: white !important;
-                            transform: translateY(-1px);
-                            box-shadow: 0 4px 12px rgba(100,116,139,0.3) !important;
-                        }
-                        
-                        .ui-button-success:hover {
-                            transform: translateY(-1px);
-                            box-shadow: 0 6px 16px rgba(25,118,210,0.4) !important;
-                        }
-                        
-                        /* Labels styling */
-                        .dialog-grid-corporativo .ui-outputlabel {
-                            font-weight: 600;
-                            color: #374151;
-                            font-size: 0.95em;
-                            margin-bottom: 0.3em;
-                        }
-                        
-                        /* Focus effects */
-                        .ui-inputfield-corporativo:focus,
                         .ui-selectonemenu.ui-inputfield-corporativo:focus-within,
                         .ui-calendar.ui-inputfield-corporativo:focus-within {
-                            transform: translateY(-1px);
-                            box-shadow: 0 6px 20px rgba(25,118,210,0.15) !important;
+                            box-shadow: none !important;
+                            transform: none !important;
                         }
+                        /* ...existing code... */
                     </style>
                 </p:dialog>
+                </h:form>
             </div>
         </div>
     </ui:define>

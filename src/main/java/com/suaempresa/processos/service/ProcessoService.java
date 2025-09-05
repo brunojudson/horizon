@@ -149,7 +149,6 @@ public class ProcessoService {
         }
     }
   
-
     @Transactional
     public void concluirItemEtapa(ItemEtapa item) {
         item.setConcluido(true);
@@ -160,9 +159,6 @@ public class ProcessoService {
     public List<EtapaProcesso> getEtapasDoProcesso(Integer processoId) {
         return etapaProcessoRepository.findByProcessoIdWithItens(processoId);
     }
-
-
-
 
     public List<ItemEtapa> getItensDaEtapa(Integer etapaProcessoId) {
         return itemEtapaRepository.findByEtapaProcessoId(etapaProcessoId);

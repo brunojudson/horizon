@@ -42,7 +42,7 @@
 						<p:column headerText="Nome" sortBy="nome">
 							<h:outputText value="#{u.nome}" />
 						</p:column>
-						<p:column headerText="Email" sortBy="email">
+						<p:column headerText="Usuário" sortBy="email">
 							<h:outputText value="#{u.email}" />
 						</p:column>
 						<p:column headerText="Perfil" sortBy="perfil">
@@ -54,7 +54,8 @@
 								<p:commandButton icon="pi pi-pencil" title="Editar" update=":usuarioDialog"
 									oncomplete="PF('manageUsuarioDialog').show()"
 									styleClass="ui-button-rounded ui-button-warning ui-button-sm"
-									rendered="#{usuarioBean.admin}">
+									rendered="#{usuarioBean.admin}"
+									disabled="#{u.email eq 'admin'}">
 									<f:setPropertyActionListener value="#{u}" target="#{usuarioBean.usuario}" />
 								</p:commandButton>
 								<p:commandButton icon="pi pi-trash" title="Excluir"
@@ -62,7 +63,8 @@
 									update=":usuarioListForm:dt-usuarios :usuarioListForm:messages"
 									styleClass="ui-button-rounded ui-button-danger ui-button-sm"
 									onclick="return confirm('Deseja realmente excluir este usuário?')"
-									rendered="#{usuarioBean.admin}" />
+									rendered="#{usuarioBean.admin}"
+									disabled="#{u.email eq 'admin'}" />
 							</div>
 						</p:column>
 					</p:dataTable>
@@ -75,7 +77,7 @@
 					<p:panel styleClass="ui-panel ui-panel-corporativo"
 						style="background: #fafbfc; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 0;">
 						<f:facet name="header">
-							<div style="display:flex; align-items:center; gap:0.8em; padding: 1.5em 1.5em 0.5em 1.5em;">
+							<div style="display:flex; align-items:center; gap:0.8em; padding: 0.2em 1.5em 0.5em 1.5em;">
 								<i class="pi pi-users" style="font-size:1.6em; color:#1976d2;"></i>
 								<span
 									style="font-size:1.4em; font-weight:600; color:#263238; letter-spacing:0.3px;">Cadastro
@@ -92,7 +94,7 @@
 											styleClass="ui-inputfield-corporativo" />
 									</div>
 									<div class="grid-item">
-										<p:outputLabel for="usuario" value="E-mail " />
+										<p:outputLabel for="usuario" value="Usuário " />
 										<p:inputText id="usuario" value="#{usuarioBean.usuario.email}" required="true"
 											placeholder="email@exemplo.com" styleClass="ui-inputfield-corporativo" />
 									</div>

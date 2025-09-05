@@ -482,16 +482,17 @@ public class ProcessoBean implements Serializable {
                 new FacesMessage(FacesMessage.SEVERITY_INFO, "Teste", "Bean está funcionando!"));
     }
 
-    public void carregarProcesso(Processo p) {
+    public void carregarProcesso(Processo proc) {
         try {
             // Carregar listas para os selects
             carregarTiposProcesso();
             carregarResponsaveis();
             carregarClientes();
             carregarLicenciamentos();
-            Processo processoCarregado = processoService.findById(p.getId());
+            Processo processoCarregado = processoService.findById(proc.getId());
             if (processoCarregado != null) {
                 this.processo = processoCarregado;
+                
                 // Preencher o campo auxiliar clienteId para exibir o cliente no select
                 if (processoCarregado.getCliente() != null) {
                     this.clienteId = processoCarregado.getCliente().getId();
@@ -504,7 +505,7 @@ public class ProcessoBean implements Serializable {
                 } else {
                     this.licenciamentoIdSelecionado = null;
                 }
-                this.etapasDoProcesso = processoService.getEtapasDoProcesso(p.getId());
+                this.etapasDoProcesso = processoService.getEtapasDoProcesso(proc.getId());
             } else {
                 this.processo = new Processo();
                 this.etapasDoProcesso = new ArrayList<>();
